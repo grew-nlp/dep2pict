@@ -1,0 +1,85 @@
+VERSION = 2.5.2
+
+
+INSTALL_DIR = @prefix@@bindir@
+DATA_DIR = @prefix@@datarootdir@/dep2pict/
+DOC_DIR = @docdir@dep2pict/
+
+BYTE_FLAGS = -g -dtypes
+OPT_FLAGS =
+
+
+OCAMLLIB = @OCAMLLIB@
+OCAMLYACC = @OCAMLYACC@
+OCAMLLEX = @OCAMLLEX@
+OCAMLFIND = @OCAMLFIND@
+RSVG = @RSVG@
+RSVG_CONVERT = @RSVG_CONVERT@
+
+ANSITERMINAL_DIR = @ANSITERMINAL_LIB@
+ANSITERMINAL_BYTE = $(ANSITERMINAL_DIR) ANSITerminal.cma
+ANSITERMINAL_OPT = $(ANSITERMINAL_DIR) ANSITerminal.cmxa
+
+
+XML_LIGHT_DIR = @XMLLIGHT_INCLUDE@
+XML_LIGHT_BYTE = $(XML_LIGHT_DIR) xml-light.cma
+XML_LIGHT_OPT = $(XML_LIGHT_DIR) xml-light.cmxa
+
+LABLGTK_DIR = -I +lablgtk2
+LABLGTK_BYTE = $(LABLGTK_DIR) lablgtk.cma lablglade.cma lablrsvg.cma -I +cairo cairo.cma cairo_lablgtk.cma
+LABLGTK_OPT = $(LABLGTK_DIR) lablgtk.cmxa lablglade.cmxa lablrsvg.cmxa -I +cairo cairo.cmxa cairo_lablgtk.cmxa
+LABLGTK_OPT_LIGHT = $(LABLGTK_DIR) lablgtk.cmxa -I +cairo cairo.cmxa cairo_lablgtk.cmxa
+
+DEP2PICT_DIR = @DEP2PICT_LIB@
+DEP2PICT_BYTE = $(DEP2PICT_DIR) dep2pict.cma
+DEP2PICT_OPT = $(DEP2PICT_DIR) dep2pict.cmxa
+
+
+LOG_DIR = @LOG_LIB@
+LOG_BYTE = $(LOG_DIR) log.cma
+LOG_OPT = $(LOG_DIR) log.cmxa
+
+DEBUG = @DEBUG@
+WARNING = @WARNING@
+MESSAGE = @MESSAGE@
+INFO = @INFO@
+
+SYSTEM = @SYSTEM@
+
+infos:
+	@echo ""
+	@echo "version              -> " $(VERSION)
+	@echo ""
+	@echo "prefix               -> " @prefix@
+	@echo "exec install dir     -> " $(INSTALL_DIR)
+	@echo "data install dir     -> " $(DATA_DIR)
+	@echo "doc install dir      -> " $(DOC_DIR)
+	@echo ""
+	@echo ""
+	@echo "byte compil flags    -> " $(BYTE_FLAGS)
+	@echo "native compil flags  -> " $(OPT_FLAGS)
+	@echo ""
+	@echo "OCAMLLIB             -> " $(OCAMLLIB)
+	@echo "OCAMLYACC            -> " $(OCAMLYACC)
+	@echo "OCAMLLEX             -> " $(OCAMLLEX)
+	@echo "OCAMLFIND            -> " $(OCAMLFIND)
+	@echo "RSVG                 -> " $(RSVG)
+	@echo "RSVG_CONVERT         -> " $(RSVG_CONVERT)
+	@echo "LABLGTK2             -> " $(LABLGTK_OPT)
+	@echo "DEP2PICT             -> " $(DEP2PICT_OPT)
+	@echo "LOG                  -> " $(LOG_OPT)
+	@echo "ANSITERMINAL         -> " $(ANSITERMINAL_OPT)
+	@echo "XML_LIGHT            -> " $(XML_LIGHT_OPT)
+	@echo ""
+	@echo "DEBUG                -> " $(DEBUG)
+	@echo "WARNING              -> " $(WARNING)
+	@echo "MESSAGE              -> " $(MESSAGE)
+	@echo "INFO                 -> " $(INFO)
+	@echo ""
+	@echo "SYSTEM               -> " $(SYSTEM)
+
+cleanup: 
+	rm -rf *.cmo *.out *.cmi *.mli deplex.ml deppars.ml *.cmxa *.a *.cmx *~ *.o *.cmx  *.cma test *.svg ui.ml *.status *.h *.log autom4te.cache config/autom4te.cache
+
+purge:
+	rm -rf Makefile

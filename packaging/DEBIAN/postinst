@@ -1,0 +1,26 @@
+#! /bin/sh
+
+cd @DATA_DIR@src 
+tar -xf dep2pict-@VERSION@.tar.gz
+cd dep2pict-@VERSION@
+./configure > log.install
+make >> log.install
+make install >> log.install	
+cd ..
+rm -rf dep2pict-@VERSION@
+
+LAUNCHER="/usr/share/applications/dep2pict.desktop"
+REP="/usr/share/desktop-directories/calligramme.directory"
+
+DESKTOP="[Desktop Entry]\nName=Dep2pict\nName[fr]=Dep2pict\nComment=Draw dependencies\nComment[fr]=Graphes de dépendences\nExec=dep2pict\nIcon=@DATA_DIR@dep2pict.png\nTerminal=false\nType=Application\nCategories=Calligramme;"
+
+FOLDER="[Desktop Entry]\nEncoding=UTF-8\nName=Calligramme\nComment=Calligramme App\nIcon=@DATA_DIR@/calligramme.png\nType=Directory"
+
+touch $REP
+echo "$FOLDER" > $REP
+if test -e $LAUNCHER; then : rm -rf $LAUNCHER ; fi
+touch $LAUNCHER
+echo "$DESKTOP" > $LAUNCHER
+xdg-desktop-menu install --novendor $REP $LAUNCHER
+xdg-desktop-menu forceupdate --mode user
+xdg-desktop-menu forceupdate --mode system

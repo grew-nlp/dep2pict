@@ -1,0 +1,3 @@
+#! /bin/sh
+
+rm -rf `which dep2pict`

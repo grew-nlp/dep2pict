@@ -1,0 +1,81 @@
+all: opt
+
+include config/Makefile
+
+byte :
+	@make -C src byte
+
+opt :
+ifeq (@BUILD_GUI@,yes)
+	@make -C src opt_gtk
+else
+	@make -C src opt
+endif
+	
+conf : config/configure.in
+	cd config && aclocal
+	autoconf -o configure config/configure.in
+
+
+LAUNCHER=/usr/share/applications/dep2pict.desktop
+REP=/usr/share/desktop-directories/calligramme.directory
+
+DESKTOP=[Desktop Entry]\nName=Dep2pict\nName[fr]=Dep2pict\nComment=Draw dependencies\nComment[fr]=Graphes de dépendences\nExec=dep2pict\nIcon=$(DATA_DIR)dep2pict.png\nTerminal=false\nType=Application\nCategories=Calligramme;
+
+FOLDER=[Desktop Entry]\nEncoding=UTF-8\nName=Calligramme\nComment=Calligramme App\nIcon=$(DATA_DIR)/calligramme.png\nType=Directory
+
+
+install : opt
+	cp bin/dep2pict.opt $(INSTALL_DIR)/dep2pict
+ifeq (@BUILD_GUI@,yes)
+	cp src/dep2pict.glade $(DATA_DIR)
+	cp img/* $(DATA_DIR)
+ifeq (@SYSTEM@,Linux)
+	touch $(REP)
+	echo "$(FOLDER)" > $(REP)
+	if test -e $(LAUNCHER); then : rm -rf $(LAUNCHER) ; fi
+	touch $(LAUNCHER)
+	echo "$(DESKTOP)" > $(LAUNCHER)
+	xdg-desktop-menu install --novendor $(REP) $(LAUNCHER)
+	xdg-desktop-menu forceupdate --mode user
+	xdg-desktop-menu forceupdate --mode system
+endif
+endif
+	
+clean :
+	@make cleanup
+	@make -C config cleanup
+	@make -C src cleanup
+
+purge_makefile :
+	@make purge
+	@make -C src purge
+	@make -C config purge
+
+
+destroot:
+	mkdir -p $(DESTDIR)$(INSTALL_DIR)
+	mkdir -p $(DESTDIR)$(DATA_DIR)
+	cp bin/dep2pict.opt $(DESTDIR)$(INSTALL_DIR)/dep2pict
+ifeq (@BUILD_GUI@,yes)
+	cp src/dep2pict.glade $(DESTDIR)$(DATA_DIR)
+	cp img/* $(DESTDIR)$(DATA_DIR)
+endif
+
+targz: clean conf
+	rm -rf dep2pict-$(VERSION)
+	mkdir -p dep2pict-$(VERSION)
+	cp -r src/ dep2pict-$(VERSION)/
+	cp -r config/ dep2pict-$(VERSION)/
+	cp -r img/ dep2pict-$(VERSION)/
+	cp configure dep2pict-$(VERSION)/
+	cp Makefile.in dep2pict-$(VERSION)/
+	tar -czvf packaging/dep2pict-$(VERSION).tar.gz dep2pict-$(VERSION)
+	rm -rf dep2pict-$(VERSION)
+
+portfile: targz
+	cd packaging && sh create_portfile.sh $(VERSION)
+
+pack_deb: targz
+	sh packaging/make_deb.sh $(VERSION) $(INSTALL_DIR) $(DATA_DIR) $(DOC_DIR)
+
