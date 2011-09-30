@@ -7,4 +7,4 @@ Installed-Size: @SIZE@
 Depends: ocaml (>=3.11), libcaml-log (=@libcaml-log-VERSION@), libcaml-dep2pict (=@libcaml-dep2pict-VERSION@), libcairo-ocaml-dev
 Suggests: libc6, librsvg2-bin
 Maintainer: Paul MASSON <paul.masson@inria.fr>
-Description: Dep2pict is a program to draw dependencies structure.
+Description: Dep2pict is a program to draw dependency structures.
