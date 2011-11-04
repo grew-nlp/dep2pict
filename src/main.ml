@@ -1,5 +1,6 @@
-open Dep2pict
+open Printf
 open Log
+open Dep2pict
 IFDEF BUILD_GUI THEN
 open Gui
 END
@@ -16,108 +17,71 @@ let _ =
 
 let version = VERSION
 
-let usage = "Usage : dep2pict -dep <dep_file> -o <output_file> [ -png | -svg | -pdf ]\n"
-^"\t -dep <dep_file> : input file\n"
-^"\t -xml <n> : input file is an xml file, want to the nth dep\n"
-^"\t -o <file> : output file (without extension)\n"
-^"\t -png : to transform dep_file to png file\n"
-^"\t -pdf : to transform dep_file to png file\n"
-^"\t -svg : to transform dep_file to svg file\n"
-^"\t -v : display version number ("^VERSION^")\n";;
+let usage = 
+  "Usage : dep2pict [ -png | -svg | -pdf ] -dep <dep_file> -o <output_file> \n" ^
+  "\t -dep <dep_file> : input file\n" ^
+  "\t -conll <conll_file> : input file\n" ^
+  "\t -o <file> : output file (without extension)\n" ^
+  "\t -png : to transform dep_file to png file (this is the default)\n" ^
+  "\t -pdf : to transform dep_file to pdg file\n" ^
+  "\t -svg : to transform dep_file to svg file\n" ^
+  "\t -v : display version number ("^version^")\n"
 
-let input_file = ref "";;
-let output_file = ref "";;
-let png = ref false;;
-let svg = ref false;;
-let pdf = ref false;;
-let xml = ref false;;
-let dep = ref 1;;
+type output = Png | Svg | Pdf
+let output = ref Png
+
+type input = Dep | Conll | Xml of int 
+let input = ref Dep
+
+let input_file = ref None
+let output_file = ref None
 
 let _ =
-    if (Array.length Sys.argv > 1) then (
-		let rec opt = function arg ->
-		match arg with
-				| "-v"::tail ->
-					Printf.printf "%s\n%!" version;
-					exit 0;
-		        | "-dep"::file::tail -> 
-		            input_file := file;
-		            opt tail;
-		            ()
-		        | "-o"::file::tail -> 
-		            output_file := file;
-		            opt tail;
-		            ()
-		        | "-png"::tail -> 
-		            png := true;
-		            opt tail;
-		            ()
-		        | "-svg"::tail -> 
-		            svg := true;
-		            opt tail;
-		            ()
-		        | "-pdf"::tail -> 
-		            pdf := true;
-		            opt tail;
-		            ()
-		        | "-xml"::n::tail -> 
-		            xml := true;
-		            dep := int_of_string n;
-		            opt tail;
-		            ()
-		        | [] -> ()
-		        | others::tail -> Log.critical (Printf.sprintf "%s : option unknown!\n%s" others usage)
-		in opt (List.tl (Array.to_list Sys.argv));
-		if (Sys.file_exists !input_file) then (
-			if ((not (!png)) && (not (!svg)) && (not (!pdf))) then (
-				Log.info (Printf.sprintf "No picture generated!");
-			) else (
-				try
-					if (!png) then (
-						if (!xml) then (
-							ignore(Dep2pict.fromXmlFileToPng (!input_file) (!output_file) !dep);
-						) else (
-							ignore(Dep2pict.fromDepFileToPng (!input_file) (!output_file));
-						);
-						Log.info (Printf.sprintf "File %s generated!" (!output_file));
-					);
-					if (!svg) then (
-						if (!xml) then (
-							ignore(Dep2pict.fromXmlFileToSvgFile (!input_file) (!output_file) !dep);
-						) else (
-							ignore(Dep2pict.fromDepFileToSvgFile (!input_file) (!output_file));
-						);
-						Log.info (Printf.sprintf "File %s generated!" (!output_file));
-					);
-					if (!pdf) then (
-						if (!xml) then (
-							ignore(Dep2pict.fromXmlFileToPdf (!input_file) (!output_file) !dep);
-						) else (
-							ignore(Dep2pict.fromDepFileToPdf (!input_file) (!output_file));
-						);
-						Log.info (Printf.sprintf "File %s generated!" (!output_file));
-					)
-				with
-					| Dep2pict.Parse_error msgs ->
-						let err = ref "" in
-						List.iter ( fun (l,m) ->
-							err := Printf.sprintf "%sLine %d : %s" !err l m
-						) msgs;
-						Printf.printf "%s" !err;
-						exit 1;
-					| Dep2pict.Id_already_in_use_ id -> Log.critical (Printf.sprintf "Id already in use : %s" id)
-					| Dep2pict.Unknown_index id -> Log.critical (Printf.sprintf "Can't find index : %s" id)
-					| Dep2pict.Loop_in_dep msg -> Log.critical (Printf.sprintf "Loop in dependency : %s" msg)
-			)
-		) else (
-			if (!input_file<>"") then (
-				Log.critical (Printf.sprintf "The file %s doesn't exist!" (!input_file))
-			) else (
-				Log.critical (Printf.sprintf "No input file!")
-			)
-		)
-    ) else (
-		IFDEF BUILD_GUI THEN Gui.main () END
-    )
-    
-    
+  if Array.length Sys.argv = 1
+  then (IFDEF BUILD_GUI THEN Gui.main () ELSE Log.critical "Gui not available" END)
+  else
+    begin
+      let rec opt = function 
+	| [] -> ()
+	| "-v"::tail -> printf "%s\n%!" version; exit 0
+
+	| "-conll"::file::tail -> input_file := Some file; input := Conll; opt tail
+	| "-dep"::file::tail -> input_file := Some file; opt tail
+
+        (* NB: the xml option is used by parconine: arg is an integer, the xml_file is given with the -dep option *)
+	| "-xml"::n::tail -> input := Xml (int_of_string n); opt tail
+   
+	| "-o"::file::tail -> output_file := Some file; opt tail
+	| "-png"::tail -> output := Png; opt tail
+	| "-svg"::tail -> output := Svg; opt tail
+	| "-pdf"::tail -> output := Pdf; opt tail
+
+	| others::tail -> Log.fcritical "%s : option unknown!\n%s" others usage
+      in opt (List.tl (Array.to_list Sys.argv));
+
+      match (!input_file, !output_file) with
+      | (None,_) -> Log.critical "No input file."
+      | (Some input,_) when not (Sys.file_exists input) -> Log.fcritical "The file %s doesn't exist." input
+      | (_,None) -> Log.critical "No ouput file specified."
+      | (Some in_file, Some out_file) ->
+          try
+            (match (!input, !output) with
+            | (Xml i, Png) -> ignore (Dep2pict.fromXmlFileToPng in_file out_file i)
+            | (Dep, Png) -> ignore (Dep2pict.fromDepFileToPng in_file out_file)
+            | (Conll, Png) -> ignore (Dep2pict.fromConllFileToPng in_file out_file)
+
+            | (Xml i, Svg) -> ignore (Dep2pict.fromXmlFileToSvgFile in_file out_file i)
+            | (Dep, Svg) -> ignore (Dep2pict.fromDepFileToSvgFile in_file out_file)
+            | (Conll, Svg) -> ignore (Dep2pict.fromConllFileToSvgFile in_file out_file)
+
+            | (Xml i, Pdf) -> ignore (Dep2pict.fromXmlFileToPdf in_file out_file i)
+            | (Dep, Pdf) -> ignore (Dep2pict.fromDepFileToPdf in_file out_file)
+            | (Conll, Pdf) -> ignore (Dep2pict.fromConllFileToPdf in_file out_file));
+
+              Log.finfo "File %s generated." out_file
+          with
+	  | Dep2pict.Parse_error msgs -> List.iter (fun (l,m) -> printf "Line %d: %s\n" l m) msgs; Log.fcritical "Parse error"
+	  | Dep2pict.Id_already_in_use_ id -> Log.fcritical "Id already in use : %s" id
+	  | Dep2pict.Unknown_index id -> Log.fcritical "Can't find index : %s" id
+	  | Dep2pict.Loop_in_dep msg -> Log.fcritical "Loop in dependency : %s" msg
+    end
