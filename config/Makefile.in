@@ -1,4 +1,4 @@
-VERSION = 2.6.0
+VERSION = 2.6.1
 
 INSTALL_DIR = @prefix@@bindir@
 DATA_DIR = @prefix@@datarootdir@/dep2pict/
