@@ -45,7 +45,7 @@ if test "$config" = yes ; then
 	fi
 
 	AC_PATH_PROG(RSVG_CONVERT,rsvg-convert,no)
-	if test "$RSVG" = no ; then
+	if test "$RSVG_CONVERT" = no ; then
 		AC_MSG_ERROR(Cannot find rsvg-convert)
 	fi
 
