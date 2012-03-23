@@ -2128,7 +2128,7 @@ $as_echo "standard" >&6; }
 		ANSITERMINAL="yes"
 	else
 		if test "$OCAMLFIND" = no ; then
-		as_fn_error $? "The ansiterminal lib is missing." "$LINENO" 5
+		as_fn_error $? "The ANSITerminal lib is missing." "$LINENO" 5
 		ANSITERMINAL=no
 		else
 			if $OCAMLFIND query ansiterminal > /dev/null 2>&1 ; then
