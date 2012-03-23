@@ -2131,7 +2131,7 @@ $as_echo "standard" >&6; }
 		as_fn_error $? "The ANSITerminal lib is missing." "$LINENO" 5
 		ANSITERMINAL=no
 		else
-			if $OCAMLFIND query ansiterminal > /dev/null 2>&1 ; then
+			if $OCAMLFIND query ANSITerminal > /dev/null 2>&1 ; then
 				ANSITERMINAL="yes"
 				ANSITERMINAL_LIB="-I `$OCAMLFIND query ANSIterminal`"
 				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ocamlfind" >&5

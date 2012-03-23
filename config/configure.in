@@ -185,7 +185,7 @@ if test "$config" = yes ; then
 		AC_MSG_ERROR(The ANSITerminal lib is missing.)
 		ANSITERMINAL=no
 		else
-			if $OCAMLFIND query ansiterminal > /dev/null 2>&1 ; then
+			if $OCAMLFIND query ANSITerminal > /dev/null 2>&1 ; then
 				ANSITERMINAL="yes"
 				ANSITERMINAL_LIB="-I `$OCAMLFIND query ANSIterminal`"
 				AC_MSG_RESULT(ocamlfind)
