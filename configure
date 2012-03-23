@@ -2133,7 +2133,7 @@ $as_echo "standard" >&6; }
 		else
 			if $OCAMLFIND query ANSITerminal > /dev/null 2>&1 ; then
 				ANSITERMINAL="yes"
-				ANSITERMINAL_LIB="-I `$OCAMLFIND query ANSIterminal`"
+				ANSITERMINAL_LIB="-I `$OCAMLFIND query ANSITerminal`"
 				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ocamlfind" >&5
 $as_echo "ocamlfind" >&6; }
 			else
