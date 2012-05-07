@@ -11,10 +11,14 @@ ifeq (@BUILD_GUI@,yes)
 else
 	@make -C src opt
 endif
-	
+
 conf : config/configure.in
+	cd config && rm -rf ac_lib_checking.*
+	cd config && wget https://gforge.inria.fr/scm/viewvc.php/*checkout*/ac_lib_checking/ac_lib_checking.m4?root=semagramme --no-check-certificate || true
+	cd config && mv ac_lib_checking.m4?root=semagramme ac_lib_checking.m4 || true
 	cd config && aclocal
-	autoconf -o configure config/configure.in
+	cd config && autoconf -o ../configure configure.in
+	rm -rf config.status config.log autom4te.cache config/autom4te.cache
 
 
 LAUNCHER=/usr/share/applications/dep2pict.desktop
@@ -28,6 +32,7 @@ FOLDER=[Desktop Entry]\nEncoding=UTF-8\nName=Calligramme\nComment=Calligramme Ap
 install : opt
 	cp bin/dep2pict.opt $(INSTALL_DIR)/dep2pict
 ifeq (@BUILD_GUI@,yes)
+	mkdir -p $(DATA_DIR)
 	cp src/dep2pict.glade $(DATA_DIR)
 	cp img/* $(DATA_DIR)
 ifeq (@SYSTEM@,Linux)
@@ -41,7 +46,7 @@ ifeq (@SYSTEM@,Linux)
 	xdg-desktop-menu forceupdate --mode system
 endif
 endif
-	
+
 clean :
 	@make cleanup
 	@make -C config cleanup

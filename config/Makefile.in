@@ -7,7 +7,8 @@ DOC_DIR = @docdir@dep2pict/
 BYTE_FLAGS = -g -dtypes
 OPT_FLAGS =
 
-
+OCAMLC = @OCAMLC@
+OCAMLOPT = @OCAMLOPT@
 OCAMLLIB = @OCAMLLIB@
 OCAMLYACC = @OCAMLYACC@
 OCAMLLEX = @OCAMLLEX@
@@ -28,12 +29,11 @@ LABLGTK_BYTE = $(LABLGTK_DIR) lablgtk.cma lablglade.cma lablrsvg.cma -I +cairo c
 LABLGTK_OPT = $(LABLGTK_DIR) lablgtk.cmxa lablglade.cmxa lablrsvg.cmxa -I +cairo cairo.cmxa cairo_lablgtk.cmxa
 LABLGTK_OPT_LIGHT = $(LABLGTK_DIR) lablgtk.cmxa -I +cairo cairo.cmxa cairo_lablgtk.cmxa
 
-DEP2PICT_DIR = @DEP2PICT_LIB@
+DEP2PICT_DIR = @DEP2PICT_INCLUDE@
 DEP2PICT_BYTE = $(DEP2PICT_DIR) dep2pict.cma
 DEP2PICT_OPT = $(DEP2PICT_DIR) dep2pict.cmxa
 
-
-LOG_DIR = @LOG_LIB@
+LOG_DIR = @LOG_INCLUDE@
 LOG_BYTE = $(LOG_DIR) log.cma
 LOG_OPT = $(LOG_DIR) log.cmxa
 

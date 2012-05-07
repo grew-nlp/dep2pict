@@ -15,19 +15,19 @@ ui.ml : dep2pict.glade
 	mv ui.tmp ui.ml
 
 ui.cmx : ui.ml
-	ocamlopt -c $(LABLGTK_OPT) ui.ml
+	$(OCAMLOPT) -c $(LABLGTK_OPT) ui.ml
 
 DEP_OPT= unix.cmxa str.cmxa $(LABLGTK_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
 DEP_OPT_LIGHT= unix.cmxa str.cmxa $(LABLGTK_OPT_LIGHT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
 
 gui.cmx : gui.ml ui.cmx 
-	ocamlopt -c -pp 'camlp4o pa_macro.cmo -DBUILD_GUI -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT) ui.cmx gui.ml
+	$(OCAMLOPT) -c -pp 'camlp4o pa_macro.cmo -DBUILD_GUI -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT) ui.cmx gui.ml
 
 main.cmx : main.ml
 ifeq (@BUILD_GUI@,yes)
-	ocamlopt -c -pp 'camlp4o pa_macro.cmo -DBUILD_GUI -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT) ui.cmx gui.cmx main.ml
+	$(OCAMLOPT) -c -pp 'camlp4o pa_macro.cmo -DBUILD_GUI -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT) ui.cmx gui.cmx main.ml
 else
-	ocamlopt -c -pp 'camlp4o pa_macro.cmo -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT) main.ml
+	$(OCAMLOPT) -c -pp 'camlp4o pa_macro.cmo -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT) main.ml
 endif
 
 
@@ -35,7 +35,7 @@ endif
 ../bin/dep2pict.opt : main.cmx
 	mkdir -p ../bin
 ifeq (@BUILD_GUI@,yes)
-	ocamlopt -o ../bin/dep2pict.opt -pp 'camlp4o pa_macro.cmo -DBUILD_GUI -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT) ui.cmx gui.cmx main.cmx
+	$(OCAMLOPT) -o ../bin/dep2pict.opt -pp 'camlp4o pa_macro.cmo -DBUILD_GUI -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT) ui.cmx gui.cmx main.cmx
 else
-	ocamlopt -o ../bin/dep2pict.opt -pp 'camlp4o pa_macro.cmo -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT_LIGHT) main.cmx
+	$(OCAMLOPT) -o ../bin/dep2pict.opt -pp 'camlp4o pa_macro.cmo -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT_LIGHT) main.cmx
 endif
