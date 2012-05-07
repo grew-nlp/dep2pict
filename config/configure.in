@@ -236,7 +236,6 @@ if test "$config" = yes ; then
 
 	# Checks for library functions.
 
-	AC_SUBST(ANSITERMINAL_LIB)
 	AC_SUBST(DEBUG)
 	AC_SUBST(WARNING)
 	AC_SUBST(INFO)
