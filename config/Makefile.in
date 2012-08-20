@@ -1,4 +1,4 @@
-VERSION = 2.6.1
+VERSION = 2.7.0
 
 INSTALL_DIR = @prefix@@bindir@
 DATA_DIR = @prefix@@datarootdir@/dep2pict/
@@ -13,8 +13,6 @@ OCAMLLIB = @OCAMLLIB@
 OCAMLYACC = @OCAMLYACC@
 OCAMLLEX = @OCAMLLEX@
 OCAMLFIND = @OCAMLFIND@
-RSVG = @RSVG@
-RSVG_CONVERT = @RSVG_CONVERT@
 
 ANSITERMINAL_DIR = @ANSITERMINAL_INCLUDE@
 ANSITERMINAL_BYTE = $(ANSITERMINAL_DIR) ANSITerminal.cma
@@ -24,10 +22,13 @@ XML_LIGHT_DIR = @XMLLIGHT_INCLUDE@
 XML_LIGHT_BYTE = $(XML_LIGHT_DIR) xml-light.cma
 XML_LIGHT_OPT = $(XML_LIGHT_DIR) xml-light.cmxa
 
-LABLGTK_DIR = -I +lablgtk2
-LABLGTK_BYTE = $(LABLGTK_DIR) lablgtk.cma lablglade.cma lablrsvg.cma -I +cairo cairo.cma cairo_lablgtk.cma
-LABLGTK_OPT = $(LABLGTK_DIR) lablgtk.cmxa lablglade.cmxa lablrsvg.cmxa -I +cairo cairo.cmxa cairo_lablgtk.cmxa
-LABLGTK_OPT_LIGHT = $(LABLGTK_DIR) lablgtk.cmxa -I +cairo cairo.cmxa cairo_lablgtk.cmxa
+CAIRO_DIR = @CAIRO_INCLUDE@
+CAIRO_BYTE = $(CAIRO_DIR) cairo.cma
+CAIRO_OPT =  $(CAIRO_DIR) cairo.cmxa
+
+LABLGTK_DIR = @LABLGTK_INCLUDE@
+LABLGTK_BYTE = $(LABLGTK_DIR) lablgtk.cma lablglade.cma lablrsvg.cma 
+LABLGTK_OPT = $(LABLGTK_DIR) lablgtk.cmxa lablglade.cmxa lablrsvg.cmxa 
 
 DEP2PICT_DIR = @DEP2PICT_INCLUDE@
 DEP2PICT_BYTE = $(DEP2PICT_DIR) dep2pict.cma
@@ -53,6 +54,7 @@ infos:
 	@echo "data install dir     -> " $(DATA_DIR)
 	@echo "doc install dir      -> " $(DOC_DIR)
 	@echo ""
+	@echo "BUILD_GUI            -> " @BUILD_GUI@
 	@echo ""
 	@echo "byte compil flags    -> " $(BYTE_FLAGS)
 	@echo "native compil flags  -> " $(OPT_FLAGS)
@@ -61,9 +63,9 @@ infos:
 	@echo "OCAMLYACC            -> " $(OCAMLYACC)
 	@echo "OCAMLLEX             -> " $(OCAMLLEX)
 	@echo "OCAMLFIND            -> " $(OCAMLFIND)
-	@echo "RSVG                 -> " $(RSVG)
-	@echo "RSVG_CONVERT         -> " $(RSVG_CONVERT)
-	@echo "LABLGTK2             -> " $(LABLGTK_OPT)
+	@echo "LABLGTK              -> " $(LABLGTK_OPT)
+	@echo "CAIRO                -> " $(CAIRO_OPT)
+
 	@echo "DEP2PICT             -> " $(DEP2PICT_OPT)
 	@echo "LOG                  -> " $(LOG_OPT)
 	@echo "ANSITERMINAL         -> " $(ANSITERMINAL_OPT)
