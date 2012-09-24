@@ -35,6 +35,12 @@ ifeq (@BUILD_GUI@,yes)
 	mkdir -p $(DATA_DIR)
 	cp src/dep2pict.glade $(DATA_DIR)
 	cp img/* $(DATA_DIR)
+endif
+
+
+install_linux:
+	echo "installation in linux desktop -- need to be root"
+ifeq (@BUILD_GUI@,yes)
 ifeq (@SYSTEM@,Linux)
 	touch $(REP)
 	echo "$(FOLDER)" > $(REP)
@@ -46,6 +52,7 @@ ifeq (@SYSTEM@,Linux)
 	xdg-desktop-menu forceupdate --mode system
 endif
 endif
+
 
 clean :
 	@make cleanup
