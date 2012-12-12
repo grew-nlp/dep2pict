@@ -33,6 +33,8 @@ let output = ref Png
 type input = Dep | Conll | Xml of int 
 let input = ref Dep
 
+let debug = ref false
+
 let input_file = ref None
 let output_file = ref None
 
@@ -62,6 +64,8 @@ let _ =
 	| "-no_lemma"::tail -> conll_lemma := false; opt tail
         | "-no_fs"::tail -> conll_fs := false; opt tail
 
+        | "-d"::tail -> debug := true; opt tail
+
 	| others::tail -> Log.fcritical "%s : option unknown!\n%s" others usage
       in opt (List.tl (Array.to_list Sys.argv));
 
@@ -76,9 +80,9 @@ let _ =
             | (Dep, Png) -> ignore (Dep2pict.fromDepFileToPng in_file out_file)
             | (Conll, Png) -> ignore (Dep2pict.fromConllFileToPng ~lemma:!conll_lemma ~fs:!conll_fs in_file out_file)
 
-            | (Xml i, Svg) -> ignore (Dep2pict.fromXmlFileToSvgFile in_file out_file i)
-            | (Dep, Svg) -> ignore (Dep2pict.fromDepFileToSvgFile in_file out_file)
-            | (Conll, Svg) -> ignore (Dep2pict.fromConllFileToSvgFile ~lemma:!conll_lemma ~fs:!conll_fs in_file out_file)
+            | (Xml i, Svg) -> ignore (Dep2pict.fromXmlFileToSvgFile ~debug:(!debug) in_file out_file i)
+            | (Dep, Svg) -> ignore (Dep2pict.fromDepFileToSvgFile ~debug:(!debug) in_file out_file)
+            | (Conll, Svg) -> ignore (Dep2pict.fromConllFileToSvgFile ~debug:(!debug) ~lemma:!conll_lemma ~fs:!conll_fs in_file out_file)
 
             | (Xml i, Pdf) -> ignore (Dep2pict.fromXmlFileToPdf in_file out_file i)
             | (Dep, Pdf) -> ignore (Dep2pict.fromDepFileToPdf in_file out_file)
