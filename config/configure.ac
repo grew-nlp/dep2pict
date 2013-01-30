@@ -109,9 +109,6 @@ if test "$config" = yes ; then
                 AC_LIB_CHECKING(Lablgtk2,lablgtk2,lablgtk2,lablgtk,GMain,"",false,true)
 	        AC_SUBST(LABLGTK_INCLUDE,$LIB_INCLUDE)
 
-        	AC_LIB_CHECKING(Cairo,cairo,cairo,cairo,Cairo,"",false,true)
-                AC_SUBST(CAIRO_INCLUDE,$LIB_INCLUDE)
-
 	        if test "$LABLGTK_INCLUDE" = no ;
                 then AC_SUBST(BUILD_GUI,no)
                 else
