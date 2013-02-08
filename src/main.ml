@@ -18,14 +18,15 @@ let _ =
 let version = VERSION
 
 let usage = 
-  "Usage : dep2pict [ -png | -svg | -pdf ] -dep <dep_file> -o <output_file> \n" ^
-  "\t -dep <dep_file> : input file\n" ^
-  "\t -conll <conll_file> : input file\n" ^
-  "\t -o <file> : output file (without extension)\n" ^
-  "\t -png : to transform dep_file to png file (this is the default)\n" ^
-  "\t -pdf : to transform dep_file to pdg file\n" ^
-  "\t -svg : to transform dep_file to svg file\n" ^
-  "\t -v : display version number ("^version^")\n"
+  "Usage: dep2pict [ -png | -svg | -pdf ] -dep <dep_file> -o <output_file> \n" ^
+  "\t -dep <dep_file>: input file\n" ^
+  "\t -conll <conll_file>: input file\n" ^
+  "\t -o <file>: output file\n" ^
+  "\t -png: to transform dep_file to png file (this is the default)\n" ^
+  "\t -pdf: to transform dep_file to pdg file\n" ^
+  "\t -svg: to transform dep_file to svg file\n" ^
+  "\t -features <string>: set features to display with CONLL input, string should contain a subset of {l,p,s,t,g,m,n} or A (for all). Default is \"\"\n" ^
+  "\t -v: display version number ("^version^")\n"
 
 type output = Png | Svg | Pdf
 let output = ref Png
@@ -47,7 +48,8 @@ let _ =
     begin
       let rec opt = function 
 	| [] -> ()
-	| "-v"::tail -> printf "%s\n%!" version; exit 0
+	| "-v"::_ -> printf "%s\n%!" version; exit 0
+        | "-help"::_ -> printf "%s\n%!" usage; exit 0
 
 	| "-conll"::file::tail -> input_file := Some file; input := Conll; opt tail
 	| "-dep"::file::tail -> input_file := Some file; opt tail
