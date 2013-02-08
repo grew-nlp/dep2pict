@@ -38,8 +38,7 @@ let debug = ref false
 let input_file = ref None
 let output_file = ref None
 
-let conll_lemma = ref true
-let conll_fs = ref true
+let conll_features = ref ""
 
 let _ =
   if Array.length Sys.argv = 1
@@ -61,8 +60,7 @@ let _ =
 	| "-svg"::tail -> output := Svg; opt tail
 	| "-pdf"::tail -> output := Pdf; opt tail
 
-	| "-no_lemma"::tail -> conll_lemma := false; opt tail
-        | "-no_fs"::tail -> conll_fs := false; opt tail
+	| "-features"::feats::tail -> conll_features := feats; opt tail
 
         | "-d"::tail -> debug := true; opt tail
 
@@ -78,15 +76,15 @@ let _ =
             (match (!input, !output) with
             | (Xml i, Png) -> ignore (Dep2pict.fromXmlFileToPng in_file out_file i)
             | (Dep, Png) -> ignore (Dep2pict.fromDepFileToPng in_file out_file)
-            | (Conll, Png) -> ignore (Dep2pict.fromConllFileToPng ~lemma:!conll_lemma ~fs:!conll_fs in_file out_file)
+            | (Conll, Png) -> ignore (Dep2pict.fromConllFileToPng ~features:!conll_features in_file out_file)
 
             | (Xml i, Svg) -> ignore (Dep2pict.fromXmlFileToSvgFile ~debug:(!debug) in_file out_file i)
             | (Dep, Svg) -> ignore (Dep2pict.fromDepFileToSvgFile ~debug:(!debug) in_file out_file)
-            | (Conll, Svg) -> ignore (Dep2pict.fromConllFileToSvgFile ~debug:(!debug) ~lemma:!conll_lemma ~fs:!conll_fs in_file out_file)
+            | (Conll, Svg) -> ignore (Dep2pict.fromConllFileToSvgFile ~debug:(!debug) ~features:!conll_features in_file out_file)
 
             | (Xml i, Pdf) -> ignore (Dep2pict.fromXmlFileToPdf in_file out_file i)
             | (Dep, Pdf) -> ignore (Dep2pict.fromDepFileToPdf in_file out_file)
-            | (Conll, Pdf) -> ignore (Dep2pict.fromConllFileToPdf ~lemma:!conll_lemma ~fs:!conll_fs in_file out_file));
+            | (Conll, Pdf) -> ignore (Dep2pict.fromConllFileToPdf ~features:!conll_features in_file out_file));
 
               Log.finfo "File %s generated." out_file
           with
