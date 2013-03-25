@@ -19,14 +19,15 @@ let version = VERSION
 
 let usage = 
   "Usage: dep2pict [ -png | -svg | -pdf ] -dep <dep_file> -o <output_file> \n" ^
-  "\t -dep <dep_file>: input file\n" ^
-  "\t -conll <conll_file>: input file\n" ^
-  "\t -o <file>: output file\n" ^
-  "\t -png: to transform dep_file to png file (this is the default)\n" ^
-  "\t -pdf: to transform dep_file to pdg file\n" ^
-  "\t -svg: to transform dep_file to svg file\n" ^
-  "\t -features <string>: set features to display with CONLL input, string should contain a subset of {l,p,s,t,g,m,n} or A (for all). Default is \"\"\n" ^
-  "\t -v: display version number ("^version^")\n"
+    "\t -dep <dep_file>: input file\n" ^
+    "\t -conll <conll_file>: input file\n" ^
+    "\t -o <file>: output file\n" ^
+    "\t -png: to transform dep_file to png file (this is the default)\n" ^
+    "\t -pdf: to transform dep_file to pdg file\n" ^
+    "\t -svg: to transform dep_file to svg file\n" ^
+    "\t -features <string>: set features to display with CONLL input, string should contain a subset of {l,p,s,t,g,m,n} or A (for all). Default is \"\"\n" ^
+    "\t -ref: add dotted links for ellpsis" ^
+    "\t -v: display version number ("^version^")\n"
 
 type output = Png | Svg | Pdf
 let output = ref Png
@@ -39,6 +40,7 @@ let debug = ref false
 let input_file = ref None
 let output_file = ref None
 
+let eps_ref = ref false
 let conll_features = ref ""
 
 let _ =
@@ -63,6 +65,7 @@ let _ =
 	| "-pdf"::tail -> output := Pdf; opt tail
 
 	| "-features"::feats::tail -> conll_features := feats; opt tail
+        | "-ref"::tail -> eps_ref := true; opt tail
 
         | "-d"::tail -> debug := true; opt tail
 
@@ -78,15 +81,15 @@ let _ =
             (match (!input, !output) with
             | (Xml i, Png) -> ignore (Dep2pict.fromXmlFileToPng in_file out_file i)
             | (Dep, Png) -> ignore (Dep2pict.fromDepFileToPng in_file out_file)
-            | (Conll, Png) -> ignore (Dep2pict.fromConllFileToPng ~features:!conll_features in_file out_file)
+            | (Conll, Png) -> ignore (Dep2pict.fromConllFileToPng ~features:!conll_features ~eps_ref:!eps_ref in_file out_file)
 
             | (Xml i, Svg) -> ignore (Dep2pict.fromXmlFileToSvgFile ~debug:(!debug) in_file out_file i)
             | (Dep, Svg) -> ignore (Dep2pict.fromDepFileToSvgFile ~debug:(!debug) in_file out_file)
-            | (Conll, Svg) -> ignore (Dep2pict.fromConllFileToSvgFile ~debug:(!debug) ~features:!conll_features in_file out_file)
+            | (Conll, Svg) -> ignore (Dep2pict.fromConllFileToSvgFile ~debug:(!debug) ~features:!conll_features ~eps_ref:!eps_ref in_file out_file)
 
             | (Xml i, Pdf) -> ignore (Dep2pict.fromXmlFileToPdf in_file out_file i)
             | (Dep, Pdf) -> ignore (Dep2pict.fromDepFileToPdf in_file out_file)
-            | (Conll, Pdf) -> ignore (Dep2pict.fromConllFileToPdf ~features:!conll_features in_file out_file));
+            | (Conll, Pdf) -> ignore (Dep2pict.fromConllFileToPdf ~features:!conll_features ~eps_ref:!eps_ref in_file out_file));
 
               Log.finfo "File %s generated." out_file
           with
