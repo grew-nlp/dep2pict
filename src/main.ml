@@ -17,17 +17,18 @@ let _ =
 
 let version = VERSION
 
-let usage = 
-  "Usage: dep2pict [ -png | -svg | -pdf ] -dep <dep_file> -o <output_file> \n" ^
-    "\t -dep <dep_file>: input file\n" ^
-    "\t -conll <conll_file>: input file\n" ^
-    "\t -o <file>: output file\n" ^
-    "\t -png: to transform dep_file to png file (this is the default)\n" ^
-    "\t -pdf: to transform dep_file to pdg file\n" ^
-    "\t -svg: to transform dep_file to svg file\n" ^
-    "\t -features <string>: set features to display with CONLL input, string should contain a subset of {l,p,s,t,g,m,n} or A (for all). Default is \"\"\n" ^
-    "\t -ref: add dotted links for ellpsis" ^
-    "\t -v: display version number ("^version^")\n"
+let usage = String.concat "\n" [
+  "Usage:";
+  "  * dep2pict <options> -dep <dep_file> -o <output_file>";
+  "  * dep2pict <options> -conll <<conll_file> -o <output_file>";
+  "Options:";
+  "  -png: set output format to png (this is the default)";
+  "  -pdf: set output format to pdf";
+  "  -svg: set output format to svg";
+  "  -features <string>: set features to display with CONLL input, string should contain a subset of {l,p,s,t,g,m,n} or A (for all). Default is \"\"";
+  "  -ref: add dotted links for ellpsis";
+  "  -v: display version number ("^version^")";
+]
 
 type output = Png | Svg | Pdf
 let output = ref Png
