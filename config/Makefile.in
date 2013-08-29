@@ -1,4 +1,4 @@
-VERSION = 2.13.0
+VERSION = 2.14.0
 
 INSTALL_DIR = @prefix@@bindir@
 DATA_DIR = @prefix@@datarootdir@/dep2pict/
@@ -23,8 +23,8 @@ XML_LIGHT_BYTE = $(XML_LIGHT_DIR) xml-light.cma
 XML_LIGHT_OPT = $(XML_LIGHT_DIR) xml-light.cmxa
 
 CAIRO_DIR = @CAIRO_INCLUDE@
-CAIRO_BYTE = $(CAIRO_DIR) cairo.cma
-CAIRO_OPT =  $(CAIRO_DIR) cairo.cmxa
+CAIRO_BYTE = $(CAIRO_DIR) cairo2.cma
+CAIRO_OPT =  $(CAIRO_DIR) cairo2.cmxa
 
 LABLGTK_DIR = @LABLGTK_INCLUDE@
 LABLGTK_BYTE = $(LABLGTK_DIR) lablgtk.cma lablglade.cma lablrsvg.cma 

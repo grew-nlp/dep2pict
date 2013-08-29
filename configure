@@ -2025,9 +2025,9 @@ $as_echo "$as_me: WARNING: Cannot find ocamlfind" >&2;}
 
 
 	NAME=Cairo
-	STD_FOLDER=cairo
-	OFIND_NAME=cairo
-	LIB_FILE=cairo
+	STD_FOLDER=cairo2
+	OFIND_NAME=cairo2
+	LIB_FILE=cairo2
 	MOD=Cairo
 	OPTIONS=""
 	NO_OPTIONAL=true
@@ -2063,7 +2063,7 @@ $as_echo_n "checking for optional library  : $NAME... " >&6; }
 		else
 			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "Cannot remove c_check_cairo.ml. Please change its right with chmod 666 c_check_cairo.ml
+as_fn_error $? "Cannot remove c_check_cairo2.ml. Please change its right with chmod 666 c_check_cairo2.ml
 See \`config.log' for more details" "$LINENO" 5; }
 		fi
 	fi

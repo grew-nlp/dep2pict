@@ -88,7 +88,7 @@ if test "$config" = yes ; then
 	m4_include(ac_lib_checking.m4)
 
 
-	AC_LIB_CHECKING(Cairo,cairo,cairo,cairo,Cairo,"",true,true)
+	AC_LIB_CHECKING(Cairo,cairo2,cairo2,cairo2,Cairo,"",true,true)
 	AC_SUBST(CAIRO_INCLUDE,$LIB_INCLUDE)			
 
 	AC_LIB_CHECKING(Dep2pict,dep2pict,dep2pict,dep2pict,Dep2pict,"",true,true)

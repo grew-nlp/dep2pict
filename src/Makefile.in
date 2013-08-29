@@ -17,8 +17,8 @@ ui.ml : dep2pict.glade
 ui.cmx : ui.ml
 	$(OCAMLOPT) -c $(LABLGTK_OPT) $(CAIRO_OPT) ui.ml
 
-DEP_OPT= unix.cmxa str.cmxa $(LABLGTK_OPT) $(CAIRO_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
-DEP_OPT_NOGUI= unix.cmxa str.cmxa $(CAIRO_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
+DEP_OPT= unix.cmxa str.cmxa bigarray.cmxa $(LABLGTK_OPT) $(CAIRO_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
+DEP_OPT_NOGUI= unix.cmxa str.cmxa bigarray.cmxa $(CAIRO_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
 
 gui.cmx : gui.ml ui.cmx 
 	$(OCAMLOPT) -c -pp 'camlp4o pa_macro.cmo -DBUILD_GUI -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT) ui.cmx gui.ml
