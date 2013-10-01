@@ -84,9 +84,7 @@ if test "$config" = yes ; then
 	fi
 	AC_SUBST(OCAMLFIND)
 
-
 	m4_include(ac_lib_checking.m4)
-
 
 	AC_LIB_CHECKING(Cairo,cairo2,cairo2,cairo2,Cairo,"",true,true)
 	AC_SUBST(CAIRO_INCLUDE,$LIB_INCLUDE)			

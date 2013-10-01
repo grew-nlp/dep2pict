@@ -29,12 +29,13 @@ let usage = String.concat "\n" [
   "  -png: set output format to png (this is the default)";
   "  -pdf: set output format to pdf";
   "  -svg: set output format to svg";
+  "  -dep: set output format to dep";
   "  -features <string>: set features to display with CONLL input, string should contain a subset of {l,p,s,t,g,m,n} or A (for all). Default is \"\"";
   "  -ref: add dotted links for ellpsis";
   "  -v: display version number ("^version^")";
 ]
 
-type output = Png | Svg | Pdf
+type output = Png | Svg | Pdf | Dep_o
 let output = ref Png
 
 type input = Dep | Conll | Xml of int 
@@ -64,6 +65,7 @@ let _ =
     | "-png"::tail -> output := Png; opt tail
     | "-svg"::tail -> output := Svg; opt tail
     | "-pdf"::tail -> output := Pdf; opt tail
+    | "-out_dep"::tail -> output := Dep_o; opt tail
 
     | "-features"::feats::tail -> conll_features := feats; opt tail
     | "-ref"::tail -> eps_ref := true; opt tail
@@ -91,11 +93,16 @@ let _ =
 
           | (Xml i, Pdf) -> ignore (Dep2pict.fromXmlFileToPdf in_file out_file i)
           | (Dep, Pdf) -> ignore (Dep2pict.fromDepFileToPdf in_file out_file)
-          | (Conll, Pdf) -> ignore (Dep2pict.fromConllFileToPdf ~features:!conll_features ~eps_ref:!eps_ref in_file out_file));
+          | (Conll, Pdf) -> ignore (Dep2pict.fromConllFileToPdf ~features:!conll_features ~eps_ref:!eps_ref in_file out_file)
+          
+          | (Conll, Dep_o) -> Dep2pict.fromConllFileToDep ~features:!conll_features ~eps_ref:!eps_ref in_file out_file
+          | (_,  Dep_o) -> Log.fcritical "Conversion from Xml or Dep into Dep is not implemented. Please contact developers if your really need it!"
+        );
+
 
         Log.finfo "File %s generated." out_file
       with
 	| Dep2pict.Parse_error msgs -> List.iter (fun (l,m) -> printf "Line %d: %s\n" l m) msgs; Log.fcritical "Parse error"
 	| Dep2pict.Id_already_in_use_ id -> Log.fcritical "Id already in use : %s" id
-	| Dep2pict.Unknown_index id -> Log.fcritical "Can't find index : %s" id
+	| Dep2pict.Unknown_index id -> Log.fcritical "Can't find index: %s" id
 	| Dep2pict.Loop_in_dep msg -> Log.fcritical "Loop in dependency : %s" msg
