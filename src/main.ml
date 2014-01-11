@@ -6,6 +6,9 @@ open Gui
 
 let gui ?file () = Gui.main ?file ()
 ELSE
+let input_file = ref None
+let output_file = ref None
+
 let gui ?file () = Log.critical "Gui not available"
 END
 
@@ -24,7 +27,7 @@ let version = VERSION
 let usage = String.concat "\n" [
   "Usage:";
   "  * dep2pict <options> -dep <dep_file> -o <output_file>";
-  "  * dep2pict <options> -conll <<conll_file> -o <output_file>";
+  "  * dep2pict <options> -conll <conll_file> -o <output_file>";
   "Options:";
   "  -png: set output format to png (this is the default)";
   "  -pdf: set output format to pdf";
@@ -42,9 +45,6 @@ type input = Dep | Conll | Xml of int
 let input = ref Dep
 
 let debug = ref false
-
-let input_file = ref None
-let output_file = ref None
 
 let eps_ref = ref false
 let conll_features = ref ""
