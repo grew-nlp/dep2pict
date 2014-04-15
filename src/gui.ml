@@ -71,25 +71,41 @@ let save (ui:ui) () =
     | None -> save_as (ui:ui) ()
 
 (* -------------------------------------------------------------------------------- *)
-let open_dep (ui:ui) () =
-  let sel = GWindow.file_selection ~title:"Open file" ~show:true() in
-  (* TODO deal with dep|conll... sel#complete ~filter:"*.conll"; *)
-
-  let _ = sel#ok_button#connect#clicked
-    ~callback: (fun () -> 
-      current_source := readFile sel#filename;
-      current_file := Some sel#filename;
-      sel#destroy ()
-    ) in
-
-  let _ = sel#cancel_button#connect#clicked ~callback:(sel#destroy) in
-  ()
-
-(* -------------------------------------------------------------------------------- *)
 let reload (ui:ui) () =
   match !current_file with
-    | Some filename -> current_source := readFile filename
+    | Some filename ->
+      current_source := readFile filename;
+      refresh_svg ui ()
     | None -> ()
+
+(* -------------------------------------------------------------------------------- *)
+let all_files () =
+  GFile.filter
+    ~name:"All files"
+    ~patterns:[ "*" ] ()
+
+let dep_filter () = 
+  GFile.filter 
+    ~name:"Dependency structure" 
+    ~patterns:[ "*.dep"; "*.conll" ] ()
+
+let open_dep (ui:ui) () =
+  let dialog = GWindow.file_chooser_dialog
+    ~action:`OPEN
+    ~title:"Open File"
+    () in
+  dialog#add_button_stock `CANCEL `CANCEL ;
+  dialog#add_select_button_stock `OPEN `OPEN ;
+  dialog#add_filter (dep_filter ()) ;
+  dialog#add_filter (all_files ());
+  begin
+    match dialog#run () with
+      | `OPEN ->
+        current_file := dialog#filename;
+        reload ui ()
+      | `DELETE_EVENT | `CANCEL -> ()
+  end ;
+  dialog#destroy ()
 
 (* -------------------------------------------------------------------------------- *)
 let export format (ui:ui) () =
@@ -147,15 +163,13 @@ let main ?infos ?file () =
   let _ = ui#edit#connect#clicked ~callback:(open_editor ui) in
   let _ = ui#save#connect#clicked ~callback:(save ui) in
   let _ = ui#save_as#connect#clicked ~callback:(save_as ui) in
-  let _ = ui#open_btn#connect#clicked
-    ~callback:(fun () -> open_dep ui (); refresh_svg ui ()) in
-  let _ = ui#reload#connect#clicked
-    ~callback:(fun () -> reload ui (); refresh_svg ui ()) in
+  let _ = ui#open_btn#connect#clicked ~callback:(open_dep ui) in
+  let _ = ui#reload#connect#clicked ~callback:(reload ui) in
 
   let _ = ui#zoom#connect#value_changed
       ~callback:
       (fun () ->
-        current_zoom := ui#zoom#adjustment#value;
+        current_zoom := ui#zoom#adjustment#value; 
         refresh_svg ui ()
       ) in
 
@@ -172,8 +186,6 @@ let main ?infos ?file () =
     | None -> ()
     | Some f -> current_file := Some f; reload ui ()
   );
-
-  refresh_svg ui ();
 
   ui#check_widgets ();
   ui#toplevel#show ();

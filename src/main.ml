@@ -23,7 +23,7 @@ let _ =
 
 let usage = String.concat "\n" [
   "================================================================================";
-  "=-=-=-=-= dep2pict a tool to draw dependency graphs =-=-=-=-=";
+  "=-=-=-=-= dep2pict: a tool to draw dependency graphs =-=-=-=-=";
   "";
   "Usage:";
   "  * dep2pict <options> input_file output_file    convert input_file into output_file" ;
@@ -35,7 +35,9 @@ let usage = String.concat "\n" [
   "  * output formats are: png, svg, pdf, dep";
   "";
   "Options:";
-  "  -i | --infos     <string> select infos to display: a '|' separated list of atoms from: \"lemma\", \"pos\", \"lpos\", \"all\", a feature name (default=\"pos\")";
+  "  -i | --infos     <string> select infos to display for conll input:";
+  "                   <string> is a '|' separated list of atoms from: \"lemma\", \"pos\", \"lpos\", \"all\",";
+  "                   (default=\"pos\")";
   "  -p | --position  <int> number of the dep structure to display when input file contains sequence (default=0)";
   "  -v | --version   display version number ("^version^")";
   "  -h | --help      show this help";
@@ -49,12 +51,13 @@ let output_file = ref None
 let position = ref 0
 let tips = ref false
 
-let infos = ref []
+let infos = ref ["pos"]
 
 let rec parse_arg = function 
   | [] -> ()
   | "-v"::_ | "--version"::_ -> printf "%s\n%!" version; exit 0
   | "-h"::_ | "--help"::_ -> printf "%s\n%!" usage; exit 0
+
   | "-i"::i::tail 
   | "--infos"::i::tail -> infos := Str.split (Str.regexp " *| *") i
 
