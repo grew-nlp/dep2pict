@@ -10,7 +10,7 @@ dep2pict_glade.ml : dep2pict.glade
 	@echo "  ----> build file 'dep2pict_glade.ml' from 'dep2pict.glade'"
 	lablgladecc2 dep2pict.glade > dep2pict_glade.ml
 	@echo "  ----> set absolute file location in 'dep2pict_glade.ml' (DATA_DIR = $(DATA_DIR))"
-	sed -i back 's|dep2pict.glade|$(DATA_DIR)dep2pict.glade|g' dep2pict_glade.ml
+	sed -iback 's|dep2pict.glade|$(DATA_DIR)dep2pict.glade|g' dep2pict_glade.ml
 	rm -f dep2pict_glade.mlback
 
 # dep2pict_glade.ml : dep2pict.glade
@@ -23,9 +23,9 @@ dep2pict_glade.ml : dep2pict.glade
 
 
 dep2pict_glade.cmx : dep2pict_glade.ml
-	$(OCAMLOPT) -c $(LABLGTK_OPT) $(CAIRO_OPT) dep2pict_glade.ml
+	$(OCAMLOPT) -c $(LABLGTK_OPT) $(LABLWEBKIT_OPT) $(CAIRO_OPT) dep2pict_glade.ml
 
-DEP_OPT= unix.cmxa str.cmxa bigarray.cmxa $(LABLGTK_OPT) $(CAIRO_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
+DEP_OPT= unix.cmxa str.cmxa bigarray.cmxa $(LABLGTK_OPT) $(LABLWEBKIT_OPT) $(CAIRO_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
 DEP_OPT_NOGUI= unix.cmxa str.cmxa bigarray.cmxa $(CAIRO_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
 
 global.cmx : global.ml

@@ -1,4 +1,4 @@
-VERSION = 2.16.1
+VERSION = 2.16.2
 
 INSTALL_DIR = @prefix@@bindir@
 DATA_DIR = @prefix@@datarootdir@/dep2pict/
@@ -25,6 +25,10 @@ XML_LIGHT_OPT = $(XML_LIGHT_DIR) xml-light.cmxa
 CAIRO_DIR = @CAIRO_INCLUDE@
 CAIRO_BYTE = $(CAIRO_DIR) cairo2.cma
 CAIRO_OPT =  $(CAIRO_DIR) cairo2.cmxa
+
+LABLWEBKIT_DIR = @LABLWEBKIT_INCLUDE@
+LABLWEBKIT_BYTE = $(LABLWEBKIT_DIR) lablwebkit.cma
+LABLWEBKIT_OPT = $(LABLWEBKIT_DIR) lablwebkit.cmxa
 
 LABLGTK_DIR = @LABLGTK_INCLUDE@
 LABLGTK_BYTE = $(LABLGTK_DIR) lablgtk.cma lablglade.cma lablrsvg.cma 

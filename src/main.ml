@@ -13,12 +13,12 @@ END
 
 let version = VERSION
 
-let _ = 
+let _ =
   Log.set_active_levels [`INFO];
   Log.set_info_label "DEP2PICT";
   Log.set_critical_label "DEP2PICT";
   Log.set_write_to_log_file false;
-  Log.set_info_foreground Log.f_green; 
+  Log.set_info_foreground Log.f_green;
   Log.set_critical_foreground Log.f_red;
   Log.set_critical_background Log.b_default;
   Log.set_show_time true
@@ -66,7 +66,7 @@ let logo = String.concat "\n" [
 
 let requested_sentid = ref None
 
-let rec parse_arg = function 
+let rec parse_arg = function
   | [] -> ()
   | "-v"::_ | "--version"::_ -> printf "%s\n%!" version; exit 0
   | "-h"::_ | "--help"::_ -> printf "%s\n%!" usage; exit 0
@@ -74,17 +74,17 @@ let rec parse_arg = function
   | "-i"::i::tail
   | "--infos"::i::tail -> current_infos := Str.split (Str.regexp " *| *") i; parse_arg tail
 
-  | "-p"::i::tail 
+  | "-p"::i::tail
   | "--position"::i::tail -> current_position := Some (int_of_string i); parse_arg tail
 
-  | "-s"::s::tail 
+  | "-s"::s::tail
   | "--sentid"::s::tail -> requested_sentid := Some s
 
   | "-d"::tail | "--debug"::tail -> debug := true; parse_arg tail
 
   | s::_ when s.[0] = '-' -> Log.fcritical "Unknwon option \"%s\"" s
 
-  | anon :: tail -> 
+  | anon :: tail ->
     begin
       match !input_file with
         | None -> input_file := Some anon
@@ -97,8 +97,8 @@ let rec parse_arg = function
 
 
 
-let _ = 
-  let () = parse_arg (List.tl (Array.to_list Sys.argv)) in 
+let _ =
+  let () = parse_arg (List.tl (Array.to_list Sys.argv)) in
 
   (* check for input_file *)
   match !input_file with
@@ -144,7 +144,7 @@ let _ =
 
                 | (Conll, Dep) -> Dep2pict.fromConllStringToDep ~infos:!current_infos !current_source out_file
 
-                | (Dep, Dep) 
+                | (Dep, Dep)
                 | (Xml, Dep) -> Log.fcritical "Conversion from Xml or Dep into Dep is not implemented. Please contact developers if your really need it!"
                 | (_, Xml) -> Log.fcritical "Conversion to Xml is not implemented. Please contact developers if your really need it!"
                 | (Pdf, _) -> Log.fcritical "pdf in not a valid input format"
