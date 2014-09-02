@@ -1,4 +1,4 @@
-VERSION = 2.16.2
+VERSION = 2.16.3
 
 INSTALL_DIR = @prefix@@bindir@
 DATA_DIR = @prefix@@datarootdir@/dep2pict/
@@ -31,8 +31,8 @@ LABLWEBKIT_BYTE = $(LABLWEBKIT_DIR) lablwebkit.cma
 LABLWEBKIT_OPT = $(LABLWEBKIT_DIR) lablwebkit.cmxa
 
 LABLGTK_DIR = @LABLGTK_INCLUDE@
-LABLGTK_BYTE = $(LABLGTK_DIR) lablgtk.cma lablglade.cma lablrsvg.cma 
-LABLGTK_OPT = $(LABLGTK_DIR) lablgtk.cmxa lablglade.cmxa lablrsvg.cmxa 
+LABLGTK_BYTE = $(LABLGTK_DIR) lablgtk.cma lablglade.cma lablrsvg.cma
+LABLGTK_OPT = $(LABLGTK_DIR) lablgtk.cmxa lablglade.cmxa lablrsvg.cmxa
 
 DEP2PICT_DIR = @DEP2PICT_INCLUDE@
 DEP2PICT_BYTE = $(DEP2PICT_DIR) dep2pict.cma
@@ -82,7 +82,7 @@ infos:
 	@echo ""
 	@echo "SYSTEM               -> " $(SYSTEM)
 
-cleanup: 
+cleanup:
 	rm -rf *.cmo *.out *.cmi *.mli deplex.ml deppars.ml *.cmxa *.a *.cmx *~ *.o *.cmx  *.cma test *.svg ui.ml *.status *.h *.log autom4te.cache config/autom4te.cache
 
 purge:
