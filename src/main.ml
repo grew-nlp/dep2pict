@@ -31,20 +31,20 @@ let usage = String.concat "\n" [
   "  * dep2pict <options> input_file output_file    convert input_file into output_file" ;
   "  * dep2pict <options> input_file                run the GUI with the given file";
   "  * dep2pict <options>                           run the GUI with an empty graph";
+  "  * dep2pict (-h | --help)                       display this help";
+  "  * dep2pict (-v | --version)                    display version number ("^version^")";
+
   "";
   "Formats are guessed from file extension:";
-  "  * input formats are: dep, conll, xml";
-  "  * output formats are: png, svg, pdf, dep";
+  "  * accepted input formats are: dep, conll, xml";
+  "  * accepted output formats are: png, svg, pdf, dep";
   "";
   "Options:";
   "  -i | --infos     <string> select infos to display for conll input:";
   "                   <string> is a '|' separated list of atoms from: \"lemma\", \"pos\", \"lpos\", \"all\",";
   "                   (default=\"pos\")";
-  "  -p | --position  <int> number of the dep structure to display when input file contains sequence";
-  "                   (incompatible with -s | --sentid, is sentid not defined the default is 0)";
   "  -s | --sentid    <string> identifier of the sentence to display (incompatible with -p | --position)";
-  "  -v | --version   display version number ("^version^")";
-  "  -h | --help      show this help";
+  "  -p | --position  <int> number of the dep structure to display when input file contains sequence (incompatible with -s | --sentid)";
   "  -d | --debug     add on_mouse_over tips in svg output (for debug purpose)";
   "================================================================================";
 ]

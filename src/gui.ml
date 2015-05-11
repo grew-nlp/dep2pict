@@ -24,6 +24,24 @@ let dep_filter () =
     ~name:"Dependency structure"
     ~patterns:[ "*.dep"; "*.conll" ] ()
 
+let check_modified continuation () =
+  if not !modified
+  then continuation ()
+  else
+    let md = GWindow.message_dialog
+      ~message:("You have unsaved changes in "^(get_id ())^"\nDo you really want to discard your changes")
+      ~buttons: GWindow.Buttons.ok_cancel
+      ~modal: true
+      ~urgency_hint:true
+      ~message_type:`QUESTION
+      () in
+  let _ = md#connect#response 
+    (function
+       | `CANCEL | `DELETE_EVENT -> md#destroy ()
+       | `OK -> md#destroy (); modified := false; continuation ()
+    ) in
+  md#show ()
+
 
 (* -------------------------------------------------------------------------------- *)
 let main () =
@@ -50,8 +68,8 @@ let main () =
       ui#error_view#buffer#set_text "";
       let _ = ui#prev_button#misc#set_sensitive (has_prev ()) in
       let _ = ui#next_button#misc#set_sensitive (has_next ()) in
-      let _ = ui#first_button#misc#set_sensitive (has_more_than_one ()) in
-      let _ = ui#last_button#misc#set_sensitive (has_more_than_one ()) in
+      let _ = ui#first_button#misc#set_sensitive (has_prev ()) in
+      let _ = ui#last_button#misc#set_sensitive (has_next ()) in
       ui#view_label#set_text (view_label ());
       ui#toplevel#set_title (file_label ());
 
@@ -96,11 +114,13 @@ let main () =
   let open_editor () =
     let editor = new editor () in
     editor#source#buffer#set_text !current_source;
+    modified := false;
 
     ignore(editor#toplevel#connect#destroy ~callback:editor#toplevel#destroy);
     ignore(editor#close_button#connect#clicked ~callback:editor#toplevel#destroy);
 
     let refresh_current_source () =
+      modified := true;
       current_source :=
         editor#source#buffer#get_text
         ~start:editor#source#buffer#start_iter
@@ -183,20 +203,24 @@ let main () =
   let _ = ui#open_button#connect#clicked ~callback:open_dep in
   let _ = GMisc.image ~stock:`OPEN ~packing: ui#open_button_box#pack () in
 
-  let _ = ui#first_button#connect#clicked ~callback: (fun () -> first (); refresh_view ()) in
+  let _ = ui#first_button#connect#clicked
+    ~callback: (fun () -> check_modified (fun () -> first (); refresh_view ()) ()) in
   let _ = GMisc.image ~stock:`GOTO_FIRST ~packing: ui#first_button_box#pack () in
 
-  let _ = ui#prev_button#connect#clicked ~callback: (fun () -> prev (); refresh_view ()) in
+  let _ = ui#prev_button#connect#clicked
+    ~callback: (fun () -> check_modified (fun () -> prev (); refresh_view ()) ()) in
   let _ = GMisc.image ~stock:`GO_BACK ~packing: ui#prev_button_box#pack () in
 
-  let _ = ui#next_button#connect#clicked ~callback: (fun () -> next (); refresh_view ()) in
+  let _ = ui#next_button#connect#clicked
+    ~callback: (fun () -> check_modified (fun () -> next (); refresh_view ()) ()) in
   let _ = GMisc.image ~stock:`GO_FORWARD ~packing: ui#next_button_box#pack () in
 
-  let _ = ui#last_button#connect#clicked ~callback: (fun () -> last (); refresh_view ()) in
+  let _ = ui#last_button#connect#clicked
+    ~callback: (fun () -> check_modified (fun () -> last (); refresh_view ()) ()) in
   let _ = GMisc.image ~stock:`GOTO_LAST ~packing: ui#last_button_box#pack () in
 
   let _ = ui#convert_button#connect#clicked ~callback:convert in
-  let _ = GMisc.image ~stock:`CONVERT ~packing: ui#convert_button_box#pack () in
+  let _ = GMisc.image ~stock:`OPEN ~packing: ui#convert_button_box#pack () in
 
   let _ = ui#zoom#connect#value_changed
     ~callback:
@@ -216,10 +240,14 @@ let main () =
           | [`CONTROL] when key = _e -> open_editor ()
           | [`CONTROL] when key = _o -> open_dep ()
 
-          | [] when key = _Left -> prev (); refresh_view ()
-          | [] when key = _Right -> next (); refresh_view ()
-          | [`CONTROL] when key = _Left -> first (); refresh_view ()
-          | [`CONTROL] when key = _Right -> last (); refresh_view ()
+          | [] when key = _Left ->
+            if has_prev () then check_modified (fun () -> prev (); refresh_view ()) ()
+          | [] when key = _Right ->
+            if has_next () then check_modified (fun () -> next (); refresh_view ()) ()
+          | [`CONTROL] when key = _Left ->
+            if has_prev () then check_modified (fun () -> first (); refresh_view ()) ()
+          | [`CONTROL] when key = _Right ->
+            if has_next () then check_modified (fun () -> last (); refresh_view ()) ()
 
           | [`CONTROL] when key = _c -> convert ()
 

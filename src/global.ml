@@ -27,6 +27,7 @@ let (output_file : string option ref) = ref None
 
 let current_infos = ref ["pos"]
 
+(* elements of [current array] are pairs (sentid, code) *)
 let (current_array : (string * string) array ref) = ref [||]
 let (current_position : int option ref) = ref None   (* position of the current_focus in the current_array *)
 
@@ -38,6 +39,8 @@ let debug = ref false
 let get_pos () = match !current_position with
   | None -> 0
   | Some v -> v
+
+let get_id () = fst (!current_array.(get_pos ()))
 
 (* -------------------------------------------------------------------------------- *)
 let array_assoc key array =
@@ -72,7 +75,7 @@ let first () =
 let last () =
   current_position := Some ((Array.length !current_array) - 1);
   update_source ()
-let has_more_than_one () = Array.length !current_array > 1
+
 (* -------------------------------------------------------------------------------- *)
 let next () = 
   match !current_position with
@@ -128,9 +131,12 @@ let write file string =
 
 (* -------------------------------------------------------------------------------- *)
 let save file =
+  match !current_position with
+  | Some index -> !current_array.(index) <- (fst (!current_array.(index)), !current_source);
   let out_ch = open_out file in
-  Array.iter (fun (_,src) -> fprintf out_ch "%s\n\n" src) !current_array;
-  close_out out_ch
+  Array.iter (fun (_,src) -> fprintf out_ch "%s\n" src) !current_array;
+  close_out out_ch;
+  modified := false
 
 (* -------------------------------------------------------------------------------- *)
 let load file =
@@ -141,9 +147,10 @@ let load file =
   let current_list = ref [] in
   try
     while true do
-      match (!sentid, input_line in_ch) with
+      let line = input_line in_ch in
+      match (!sentid, line) with
         | None, "" -> ()
-        | Some si, "" ->
+        | Some si, "" -> 
           current_list := (si, Buffer.contents buff) :: !current_list;
           Buffer.clear buff;
           sentid := None;
@@ -152,7 +159,7 @@ let load file =
           incr cpt;
           let new_sentid = 
             match Str.split (Str.regexp "\t") line with
-              | [_;_;_;_;_;"_";_;_;_;_] -> None
+              | [_;_;_;_;_;"_";_;_;_;_] -> sprintf "%05d.conll" !cpt
               | [_;_;_;_;_;fs_string;_;_;_;_] ->
                 let fs = List.map
                   (fun feat_string ->
@@ -160,9 +167,9 @@ let load file =
                       | [name;value] -> (name,value)
                       | _ -> failwith (Printf.sprintf "#1 >>%S<<\n%!" feat_string)
                   ) (Str.split (Str.regexp "|") fs_string) in
-                (try Some (List.assoc "sentid" fs) with Not_found -> Some (sprintf "%05d.conll" !cpt))
-              | _ -> Some (sprintf "%05d.conll" !cpt) in
-          sentid := new_sentid;
+                (try List.assoc "sentid" fs with Not_found -> sprintf "%05d.conll" !cpt)
+              | _ -> sprintf "%05d.conll" !cpt in
+          sentid := Some new_sentid;
           Printf.bprintf buff "%s\n" line
     done
   with End_of_file ->
