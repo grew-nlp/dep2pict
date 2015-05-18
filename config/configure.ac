@@ -92,6 +92,9 @@ if test "$config" = yes ; then
 	AC_LIB_CHECKING(Dep2pict,dep2pict,dep2pict,dep2pict,Dep2pict,"",true,true)
 	AC_SUBST(DEP2PICT_INCLUDE,$LIB_INCLUDE)
 
+    AC_LIB_CHECKING(Camomile,camomile,camomile,camomile,"CamomileLibraryDefault","bigarray.cma",true)
+    AC_SUBST(CAMOMILE_INCLUDE,$LIB_INCLUDE)
+
 	AC_LIB_CHECKING(Log,log,log,log,Log,"",true,true)
 	AC_SUBST(LOG_INCLUDE,$LIB_INCLUDE)
 

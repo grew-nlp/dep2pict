@@ -25,8 +25,8 @@ dep2pict_glade.ml : dep2pict.glade
 dep2pict_glade.cmx : dep2pict_glade.ml
 	$(OCAMLOPT) -c $(LABLGTK_OPT) $(LABLWEBKIT_OPT) $(CAIRO_OPT) dep2pict_glade.ml
 
-DEP_OPT= unix.cmxa str.cmxa bigarray.cmxa $(LABLGTK_OPT) $(LABLWEBKIT_OPT) $(CAIRO_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
-DEP_OPT_NOGUI= unix.cmxa str.cmxa bigarray.cmxa $(CAIRO_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
+DEP_OPT= unix.cmxa str.cmxa bigarray.cmxa $(LABLGTK_OPT) $(LABLWEBKIT_OPT) $(CAIRO_OPT) $(CAMOMILE_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
+DEP_OPT_NOGUI= unix.cmxa str.cmxa bigarray.cmxa $(CAIRO_OPT) $(CAMOMILE_OPT) $(XML_LIGHT_OPT) $(ANSITERMINAL_OPT) $(LOG_OPT) $(DEP2PICT_OPT) 
 
 global.cmx : global.ml
 	$(OCAMLOPT) -c -pp 'camlp4o pa_macro.cmo -DBUILD_GUI -DDATA_DIR=\"$(DATA_DIR)\" $(LOG) -DVERSION=\"$(VERSION)\"' $(DEP_OPT) global.ml
