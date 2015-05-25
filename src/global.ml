@@ -132,6 +132,7 @@ let write file string =
 (* -------------------------------------------------------------------------------- *)
 let save file =
   match !current_position with
+  | None -> Log.critical "[Global.save] No position defined!"
   | Some index -> !current_array.(index) <- (fst (!current_array.(index)), !current_source);
   let out_ch = open_out file in
   Array.iter (fun (_,src) -> fprintf out_ch "%s\n" src) !current_array;
