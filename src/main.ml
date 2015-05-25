@@ -78,7 +78,7 @@ let rec parse_arg = function
   | "--position"::i::tail -> current_position := Some (int_of_string i); parse_arg tail
 
   | "-s"::s::tail
-  | "--sentid"::s::tail -> requested_sentid := Some s
+  | "--sentid"::s::tail -> requested_sentid := Some s; parse_arg tail
 
   | "-d"::tail | "--debug"::tail -> debug := true; parse_arg tail
 
