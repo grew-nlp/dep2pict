@@ -45,7 +45,8 @@ let usage = String.concat "\n" [
   "                   (default=\"pos\")";
   "  -s | --sentid    <string> identifier of the sentence to display (incompatible with -p | --position)";
   "  -p | --position  <int> number of the dep structure to display when input file contains sequence (incompatible with -s | --sentid)";
-  "  -d | --debug     add on_mouse_over tips in svg output (for debug purpose)";
+  "  -d | --debug     add on_mouse_over tips in svg output and set verbose mode for font utilities";
+  "  --special_chars  <file> give a set of chars (one char by line) that are considered as 1.5 width of 'X' (for korean chars for instance)";
   "================================================================================";
 ]
 
@@ -66,6 +67,9 @@ let logo = String.concat "\n" [
 
 let requested_sentid = ref None
 
+(* the name of the file containing special chars (like korean chars) *)
+let special_chars = ref None
+
 let rec parse_arg = function
   | [] -> ()
   | "-v"::_ | "--version"::_ -> printf "%s\n%!" version; exit 0
@@ -79,6 +83,8 @@ let rec parse_arg = function
 
   | "-s"::s::tail
   | "--sentid"::s::tail -> requested_sentid := Some s; parse_arg tail
+
+  | "--special_chars"::s::tail -> special_chars := Some s; parse_arg tail
 
   | "-d"::tail | "--debug"::tail -> debug := true; parse_arg tail
 
@@ -99,6 +105,14 @@ let rec parse_arg = function
 
 let _ =
   let () = parse_arg (List.tl (Array.to_list Sys.argv)) in
+
+  if !debug then Dep2pict.set_verbose ();
+
+  begin
+    match !special_chars with
+    | None -> ()
+    | Some filename -> Dep2pict.load_special_chars filename
+  end;
 
   (* check for input_file *)
   match !input_file with

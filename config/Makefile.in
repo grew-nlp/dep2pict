@@ -1,4 +1,4 @@
-VERSION = 2.17
+VERSION = 2.18
 
 INSTALL_DIR = @prefix@@bindir@
 DATA_DIR = @prefix@@datarootdir@/dep2pict/
