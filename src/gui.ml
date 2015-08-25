@@ -45,6 +45,7 @@ let check_modified continuation () =
 
 (* -------------------------------------------------------------------------------- *)
 let main () =
+
   let _ = GMain.Main.init () in
 
   (* Build the main windows *)
@@ -58,14 +59,17 @@ let main () =
   (* -------------------------------------------------------------------------------- *)
   let refresh_view () =
     try
-      let svg =
+      let graph =
         if !current_source <> "" && !current_source.[0] = '1'
-        then Dep2pict.fromConllStringToSvgString ~infos:(!current_infos) !current_source
-        else Dep2pict.fromDepStringToSvgString !current_source in
+        then Dep2pict.from_conll !current_source
+        else Dep2pict.from_dep !current_source in
+ 
+     let svg = try Dep2pict.to_svg graph with _ -> failwith "FFF" in
       webkit#load_html_string svg "";
       webkit#set_zoom_level (!current_zoom /. 100.);
 
       ui#error_view#buffer#set_text "";
+
       let _ = ui#prev_button#misc#set_sensitive (has_prev ()) in
       let _ = ui#next_button#misc#set_sensitive (has_next ()) in
       let _ = ui#first_button#misc#set_sensitive (has_prev ()) in
@@ -161,30 +165,31 @@ let main () =
 
     let format =
       match (ui#svg_radio#active, ui#png_radio#active, ui#pdf_radio#active) with
-        | (true,false,false) -> Svg
-        | (false,true,false) -> Png
-        | (false,false,true) -> Pdf
+        | (true,false,false) -> Format.Svg
+        | (false,true,false) -> Format.Png
+        | (false,false,true) -> Format.Pdf
         | _ -> Log.critical "Inconsistent format radiobuttons" in
 
-    let title = sprintf "Convert file to %s" (string_of_format format) in
+    let title = sprintf "Convert file to %s" (Format.to_string format) in
     let file_window = GWindow.file_selection ~title ~show:true() in
     let _ = file_window#ok_button#connect#clicked
       ~callback:(fun () ->
         begin
-          let dep_code =
+          let graph =
             if String.length !current_source > 0 && !current_source.[0] = '1'
-            then Dep2pict.fromConllStringToDepString !current_source
-            else !current_source in
+            then Dep2pict.from_conll !current_source
+            else Dep2pict.from_dep !current_source in
+
           match format with
-            | Svg -> write file_window#filename (Dep2pict.fromDepStringToSvgString dep_code)
-            | Png -> ignore (Dep2pict.fromDepStringToPng dep_code file_window#filename)
-            | Pdf -> ignore (Dep2pict.fromDepStringToPdf dep_code file_window#filename)
-            | _ -> Log.fcritical "Unsupported output format: %s" (string_of_format format)
+            | Format.Svg -> Dep2pict.save_svg ~filename:file_window#filename graph
+            | Format.Png -> Dep2pict.save_png ~filename:file_window#filename graph
+            | Format.Pdf -> Dep2pict.save_pdf ~filename:file_window#filename graph
+            | _ -> Log.fcritical "Unsupported output format: %s" (Format.to_string format)
         end;
         file_window#destroy ()
       ) in
     let _ =  file_window#cancel_button#connect#clicked ~callback:(file_window#destroy) in
-    let _ = file_window#complete ~filter:("*."^(string_of_format format)) in
+    let _ = file_window#complete ~filter:("*."^(Format.to_string format)) in
     () in
 
 

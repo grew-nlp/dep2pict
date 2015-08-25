@@ -40,46 +40,28 @@ let usage = String.concat "\n" [
   "  * accepted output formats are: png, svg, pdf, dep";
   "";
   "Options:";
-  "  -i | --infos     <string> select infos to display for conll input:";
-  "                   <string> is a '|' separated list of atoms from: \"lemma\", \"pos\", \"lpos\", \"all\",";
-  "                   (default=\"pos\")";
   "  -s | --sentid    <string> identifier of the sentence to display (incompatible with -p | --position)";
   "  -p | --position  <int> number of the dep structure to display when input file contains sequence (incompatible with -s | --sentid)";
   "  -d | --debug     add on_mouse_over tips in svg output and set verbose mode for font utilities";
+  "  -b | --batch     Unformated error message that can be used in a pipeline or a web app";
   "  --special_chars  <file> give a set of chars (one char by line) that are considered as 1.5 width of 'X' (for korean chars for instance)";
   "================================================================================";
 ]
 
-let logo = String.concat "\n" [
-"[GRAPH] { word_spacing=0; opacity=50; scale=300 }";
-"[WORDS] {";
-"  A { word=\"Dep\"; forecolor=purple; }";
-"  B { word=\"2\"; forecolor=orange; }";
-"  C { word=\"pict\"; forecolor=pink; }";
-"}";
-"[EDGES] {";
-"  A -> B { color=red; }";
-"  C -> B { color=blue;}";
-"  B -> A { bottom; color=yellow; }";
-"  B -> C { bottom; color=green; }";
-"}";
-]
 
 let requested_sentid = ref None
 
 (* the name of the file containing special chars (like korean chars) *)
 let special_chars = ref None
 
+
 let rec parse_arg = function
   | [] -> ()
   | "-v"::_ | "--version"::_ -> printf "%s\n%!" version; exit 0
   | "-h"::_ | "--help"::_ -> printf "%s\n%!" usage; exit 0
 
-  | "-i"::i::tail
-  | "--infos"::i::tail -> current_infos := Str.split (Str.regexp " *| *") i; parse_arg tail
-
   | "-p"::i::tail
-  | "--position"::i::tail -> current_position := Some (int_of_string i); parse_arg tail
+  | "--position"::i::tail -> current_position := ((int_of_string i)-1); parse_arg tail
 
   | "-s"::s::tail
   | "--sentid"::s::tail -> requested_sentid := Some s; parse_arg tail
@@ -88,21 +70,22 @@ let rec parse_arg = function
 
   | "-d"::tail | "--debug"::tail -> debug := true; parse_arg tail
 
+  | "-b"::tail | "--batch"::tail -> batch := true; parse_arg tail
+
   | s::_ when s.[0] = '-' -> Log.fcritical "Unknwon option \"%s\"" s
 
   | anon :: tail ->
     begin
       match !input_file with
-        | None -> input_file := Some anon
-        | Some _ ->
-          match !output_file with
-            | None -> output_file := Some anon
-            | Some _ -> Log.fcritical "At most two anonymous arguments are allowed, don't know what to do with \"%s\"" anon
+      | None -> input_file := Some anon
+      | Some _ ->
+        match !output_file with
+        | None -> output_file := Some anon
+        | Some _ -> Log.fcritical "At most two anonymous arguments are allowed, don't know what to do with \"%s\"" anon
     end;
     parse_arg tail
 
-
-
+(* -------------------------------------------------------------------------------- *)
 let _ =
   let () = parse_arg (List.tl (Array.to_list Sys.argv)) in
 
@@ -114,62 +97,56 @@ let _ =
     | Some filename -> Dep2pict.load_special_chars filename
   end;
 
-  (* check for input_file *)
-  match !input_file with
-    | None -> current_source := logo; gui ()
+  (* check for input_file and load file if any *)
+  begin
+    match !input_file with
+    | None -> ()
     | Some in_file when not (Sys.file_exists in_file) -> Log.fcritical "The input file %s doesn't exist." in_file
-    | Some in_file -> load in_file;
+    | Some in_file -> load in_file
+  end;
 
-      (* check for focus *)
-      begin
-        match (!current_position, !requested_sentid) with
-          | (None, None) when Array.length !current_array = 0 -> ()
-          | (None, None) -> current_position := Some 0
-          | (Some p, None) when p < 0 || p >= (Array.length !current_array) ->
-            Log.fwarning "position %d is out of bounds, set position to 0" p;
-            current_position := Some 0
-          | (Some p, None) -> current_position := Some p
-          | (None, Some sentid) -> (
-            try search_sentid sentid
-            with Not_found -> Log.fwarning "sentid %s cannot be found, set position to 0" sentid;
+  (* check for focus *)
+  begin
+    match (!current_data, !current_position, !requested_sentid) with
+    | (Conll _, _, Some sentid) -> (
+      try search_sentid sentid
+      with Not_found ->
+        Log.fwarning "sentid %s cannot be found, set position to 0" sentid;
+        current_position := 0; update_source ()
+      )
+    | (Conll arr, p, None) when p < 0 || p >= (Array.length arr) ->
+      Log.fwarning "position %d is out of bounds, set position to 0" p;
+      current_position := 0; update_source ()
+    | (Conll _, p, None) -> current_position := p; update_source ()
+    | (_, _, Some _) -> Log.fcritical "Options --sentid can be used only with CONLL input"
+    | (_, _, None) -> ()
+  end;
+
+  match !output_file with
+    | None -> gui ()
+    | Some out_file ->
+      try
+        let graph = match !current_data with
+        | No_data -> critical "No input data loaded"
+        | Dep (g,_) -> g
+        | Conll _ -> Dep2pict.from_conll ~conll:(!current_source) in
+        begin
+          match Format.get out_file with
+          | Format.Svg -> Dep2pict.save_svg ~filename:out_file graph
+          | Format.Pdf -> Dep2pict.save_pdf ~filename:out_file graph
+          | Format.Png -> Dep2pict.save_png ~filename:out_file graph
+          | Format.Dep -> (
+            match (!current_data, !current_position) with
+            | (Conll arr, p) -> File.write out_file (Dep2pict.conll_to_dep ~conll:(snd arr.(p)))
+            | _ -> critical "<dep> output format is available only for <conll> inputs"
           )
-          | (Some _, Some _) -> Log.fcritical "Options --position and --sentid are incompatible"
-      end;
-
-      update_source ();
-
-      match !output_file with
-        | None -> gui ()
-        | Some out_file ->
-          begin
-            try
-              match (get_format in_file, get_format out_file) with
-                | (Xml, Png) -> ignore (Dep2pict.fromXmlFileToPng in_file out_file (get_pos ()))
-                | (Dep, Png) -> ignore (Dep2pict.fromDepFileToPng in_file out_file)
-                | (Conll, Png) -> ignore (Dep2pict.fromConllStringToPng ~infos:!current_infos !current_source out_file)
-
-                | (Xml, Svg) -> ignore (Dep2pict.fromXmlFileToSvgFile ~debug:(!debug) in_file out_file (get_pos ()))
-                | (Dep, Svg) -> ignore (Dep2pict.fromDepFileToSvgFile ~debug:(!debug) in_file out_file)
-                | (Conll, Svg) -> ignore (Dep2pict.fromConllStringToSvgFile ~infos:!current_infos !current_source out_file)
-
-                | (Xml, Pdf) -> ignore (Dep2pict.fromXmlFileToPdf in_file out_file (get_pos ()))
-                | (Dep, Pdf) -> ignore (Dep2pict.fromDepFileToPdf in_file out_file)
-                | (Conll, Pdf) -> ignore (Dep2pict.fromConllStringToPdf ~infos:!current_infos !current_source out_file)
-
-                | (Conll, Dep) -> Dep2pict.fromConllStringToDep ~infos:!current_infos !current_source out_file
-
-                | (Dep, Dep)
-                | (Xml, Dep) -> Log.fcritical "Conversion from Xml or Dep into Dep is not implemented. Please contact developers if your really need it!"
-                | (_, Xml) -> Log.fcritical "Conversion to Xml is not implemented. Please contact developers if your really need it!"
-                | (Pdf, _) -> Log.fcritical "pdf in not a valid input format"
-                | (Svg, _) -> Log.fcritical "svg in not a valid input format"
-                | (Png, _) -> Log.fcritical "png in not a valid input format"
-                | (_, Conll) -> Log.fcritical "conll in not a valid output format"
-            with
-	      | Dep2pict.Parse_error msgs -> List.iter (fun (l,m) -> printf "Line %d: %s\n" l m) msgs; Log.fcritical "Parse error !!"
-	      | Dep2pict.Id_already_in_use_ id -> Log.fcritical "Id already in use : %s" id
-	      | Dep2pict.Unknown_index id -> Log.fcritical "Can't find index: %s" id
-	      | Dep2pict.Loop_in_dep msg -> Log.fcritical "Loop in dependency : %s" msg
-          end;
-          Log.finfo "File %s generated." out_file
-
+          | f -> critical "<%s> is not a valid output format" (Format.to_string f)
+        end;
+        Log.finfo "File %s generated." out_file
+      with
+      | Dep2pict.Parse_error msgs -> List.iter (fun (l,m) -> printf "Line %d: %s\n" l m) msgs; critical "Parse error !!"
+      | Dep2pict.Id_already_in_use_ id -> critical "Id already used: %s" id
+      | Dep2pict.Conll_format msg -> critical "Invalid CONLL line: %s" msg
+      | Dep2pict.Unknown_index id -> critical "Can't find index: %s" id
+      | Dep2pict.Loop_in_dep msg -> critical "Loop in dependency: %s" msg
+      | exc -> critical "Unexpected exception <%s>, please report" (Printexc.to_string exc)

@@ -20,37 +20,12 @@ conf : config/configure.ac
 	cd config && autoconf -o ../configure configure.ac
 	rm -rf config.status config.log autom4te.cache config/autom4te.cache
 
-
-LAUNCHER=/usr/share/applications/dep2pict.desktop
-REP=/usr/share/desktop-directories/calligramme.directory
-
-DESKTOP=[Desktop Entry]\nName=Dep2pict\nName[fr]=Dep2pict\nComment=Draw dependencies\nComment[fr]=Graphes de dépendences\nExec=dep2pict\nIcon=$(DATA_DIR)dep2pict.png\nTerminal=false\nType=Application\nCategories=Calligramme;
-
-FOLDER=[Desktop Entry]\nEncoding=UTF-8\nName=Calligramme\nComment=Calligramme App\nIcon=$(DATA_DIR)/calligramme.png\nType=Directory
-
-
 install : opt
 	cp bin/dep2pict.opt $(INSTALL_DIR)/dep2pict
 ifeq (@BUILD_GUI@,yes)
 	mkdir -p $(DATA_DIR)
 	cp src/dep2pict.glade $(DATA_DIR)
 	cp img/* $(DATA_DIR)
-endif
-
-
-install_linux:
-	echo "installation in linux desktop -- need to be root"
-ifeq (@BUILD_GUI@,yes)
-ifeq (@SYSTEM@,Linux)
-	touch $(REP)
-	echo "$(FOLDER)" > $(REP)
-	if test -e $(LAUNCHER); then : rm -rf $(LAUNCHER) ; fi
-	touch $(LAUNCHER)
-	echo "$(DESKTOP)" > $(LAUNCHER)
-	xdg-desktop-menu install --novendor $(REP) $(LAUNCHER)
-	xdg-desktop-menu forceupdate --mode user
-	xdg-desktop-menu forceupdate --mode system
-endif
 endif
 
 
@@ -73,21 +48,3 @@ ifeq (@BUILD_GUI@,yes)
 	cp src/dep2pict.glade $(DESTDIR)$(DATA_DIR)
 	cp img/* $(DESTDIR)$(DATA_DIR)
 endif
-
-targz: clean conf
-	rm -rf dep2pict-$(VERSION)
-	mkdir -p dep2pict-$(VERSION)
-	cp -r src/ dep2pict-$(VERSION)/
-	cp -r config/ dep2pict-$(VERSION)/
-	cp -r img/ dep2pict-$(VERSION)/
-	cp configure dep2pict-$(VERSION)/
-	cp Makefile.in dep2pict-$(VERSION)/
-	tar -czvf packaging/dep2pict-$(VERSION).tar.gz dep2pict-$(VERSION)
-	rm -rf dep2pict-$(VERSION)
-
-portfile: targz
-	cd packaging && sh create_portfile.sh $(VERSION)
-
-pack_deb: targz
-	sh packaging/make_deb.sh $(VERSION) $(INSTALL_DIR) $(DATA_DIR) $(DOC_DIR)
-
