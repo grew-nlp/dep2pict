@@ -64,7 +64,7 @@ let main () =
         then Dep2pict.from_conll !current_source
         else Dep2pict.from_dep !current_source in
  
-     let svg = try Dep2pict.to_svg graph with _ -> failwith "FFF" in
+    let svg = Dep2pict.to_svg graph in
       webkit#load_html_string svg "";
       webkit#set_zoom_level (!current_zoom /. 100.);
 
@@ -76,24 +76,49 @@ let main () =
       let _ = ui#last_button#misc#set_sensitive (has_next ()) in
       ui#view_label#set_text (view_label ());
       ui#toplevel#set_title (file_label ());
-
     with
       | Dep2pict.Parse_error msgs ->
         ui#error_view#buffer#set_text
           (String.concat "\n" (List.map (fun (l,m) -> sprintf "Line %d: %s" l m) msgs));
-      | Dep2pict.Id_already_in_use_ id -> ui#error_view#buffer#set_text ("Id already in use : "^id)
-      | Dep2pict.Unknown_index id -> ui#error_view#buffer#set_text ("Can't find index : "^id)
-      | Dep2pict.Loop_in_dep msg -> ui#error_view#buffer#set_text ("Loop in dependency : "^msg)
-      | Dep2pict.Conll_format msg -> ui#error_view#buffer#set_text ("Conll format : "^msg) in
+      | Dep2pict.Id_already_in_use_ id -> ui#error_view#buffer#set_text ("Id already in use: "^id)
+      | Dep2pict.Unknown_index id -> ui#error_view#buffer#set_text ("Can't find index: "^id)
+      | Dep2pict.Loop_in_dep msg -> ui#error_view#buffer#set_text ("Loop in dependency: "^msg)
+      | Dep2pict.Conll_format msg -> ui#error_view#buffer#set_text ("Conll format: "^msg) in
 
   (* -------------------------------------------------------------------------------- *)
+  (* Hack to keep the horizontal position *)
+  let user_hpos = ref 0. in
+  let _ = GMain.Timeout.add ~ms:50
+    ~callback: (fun () -> 
+      if ui#scroll#hadjustment#value = 0. && !user_hpos > 0.
+      then (ui#scroll#hadjustment#set_value !user_hpos; user_hpos := 0.);
+    true) in
+
   let reload () =
     match !input_file with
       | Some filename ->
         load filename;
+        input_last_modifaction_time := (let stat = Unix.stat filename in stat.Unix.st_mtime);
         update_source ();
+        user_hpos := ui#scroll#hadjustment#value; (* Hack (cf above) *)
         refresh_view ()
       | None -> () in
+
+  (* check if file has changed *)
+  let _ = GMain.Timeout.add
+    ~ms:1000
+    ~callback:
+      (fun () ->
+        begin 
+          match !input_file with
+          | None -> ()
+          | Some filename ->
+            let stat = Unix.stat filename in
+            if stat.Unix.st_mtime > !input_last_modifaction_time
+            then reload ()
+        end;
+       true
+     ) in
 
   (* -------------------------------------------------------------------------------- *)
   let open_dep () =

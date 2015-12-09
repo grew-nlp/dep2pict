@@ -90,6 +90,8 @@ type input_data =
   | Conll of (string * string) array
 
 let (input_file : string option ref) = ref None
+let (input_last_modifaction_time) = ref 0.
+
 let (output_file : string option ref) = ref None
 
 let current_data = ref No_data
@@ -205,18 +207,28 @@ let conll_array file =
   let in_ch = open_in file in
   let buff = Buffer.create 32 in
   let cpt = ref 0 in
+  let line_num = ref 0 in
   let sentid = ref None in
   let current_list = ref [] in
   try
     while true do
+      incr line_num;
       let line = input_line in_ch in
       match (!sentid, line) with
         | None, "" -> ()
         | Some si, "" -> 
           current_list := (si, Buffer.contents buff) :: !current_list;
           Buffer.clear buff;
-          sentid := None;
-        | Some oc, line -> Printf.bprintf buff "%s\n" line
+          sentid := None
+
+        | _, s when s.[0]='#' ->
+          begin
+            match Str.bounded_split (Str.regexp "\\(# *\\)\\|\\( *: *\\)") s 2 with
+            | ["sentid"; si] -> sentid := Some si
+            | _ -> ()
+          end
+
+        | Some _, line -> Printf.bprintf buff "%s\n" line
         | None, line ->
           incr cpt;
           let new_sentid = 
@@ -227,7 +239,8 @@ let conll_array file =
                   (fun feat_string ->
                     match Str.split (Str.regexp "=") feat_string with
                       | [name;value] -> (name,value)
-                      | _ -> failwith (Printf.sprintf "#1 >>%S<<\n%!" feat_string)
+                      | [name] -> (name, "_")
+                      | _ -> Log.fcritical "[File:%s, line:%d] cannot parse feature structure: %s" file !line_num fs_string
                   ) (Str.split (Str.regexp "|") fs_string) in
                 (try List.assoc "sentid" fs with Not_found -> sprintf "%05d.conll" !cpt)
               | _ -> sprintf "%05d.conll" !cpt in
@@ -249,7 +262,7 @@ let load file =
     | _ ->
       Log.fwarning "No valid input format detected for file \"%s\", try to guess...\n%!" file;
       let text = File.read file in
-      if String.length text > 0 && text.[0] = '1'
+      if String.length text > 0 && (text.[0] = '1' || text.[0] = '#')
       then current_data := Conll (conll_array file)
       else current_data := Dep (Dep2pict.from_dep text, text)
   with
