@@ -1,0 +1,20 @@
+opam-version: "1.2"
+maintainer: "Bruno.Guillaume@loria.fr"
+homepage: "htpp://dep2pict.loria.fr"
+build: [
+  ["make"]
+]
+install: [
+  ["make" "install"]
+]
+remove: [
+  ["make" "uninstall"]
+]
+depends: [
+  "ANSITerminal"
+  "libcaml-log"
+  "cairo2"
+  "camomile"
+  "lablgtk"
+  "libcaml-dep2pict"
+]

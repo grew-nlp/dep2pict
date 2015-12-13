@@ -1,9 +1,0 @@
-opam-version: "1"
-maintainer: "Bruno.Guillaume@loria.fr"
-build: [
-  ["./configure" "--prefix" prefix]
-  ["make"]
-  ["make" "install"]
-]
-depends: ["ANSITerminal" "camomile" "libcaml-log" "cairo2" "lablgtk" "libcaml-dep2pict"]
-

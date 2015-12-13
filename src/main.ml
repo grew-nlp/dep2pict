@@ -4,13 +4,6 @@ open Dep2pict
 
 open Global
 
-IFDEF BUILD_GUI THEN
-open Gui
-let gui () = Gui.main ()
-ELSE
-let gui () = Log.critical "Gui not available"
-END
-
 let version = VERSION
 
 let _ =
@@ -123,7 +116,7 @@ let _ =
   end;
 
   match !output_file with
-    | None -> gui ()
+    | None -> Gui.main ()
     | Some out_file ->
       try
         let graph = match !current_data with
