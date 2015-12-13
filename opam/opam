@@ -5,10 +5,10 @@ build: [
   ["make" "PREFIX=%{prefix}%"]
 ]
 install: [
-  ["make" "install"]
+  ["make" "install" "PREFIX=%{prefix}%"]
 ]
 remove: [
-  ["make" "uninstall"]
+  ["make" "uninstall" "PREFIX=%{prefix}%"]
 ]
 depends: [
   "ANSITerminal"
