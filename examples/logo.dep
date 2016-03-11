@@ -1,0 +1,12 @@
+[GRAPH] { word_spacing=0; opacity=50; scale=300 }
+[WORDS] {
+  A { word="Dep"; forecolor=purple; }
+  B { word="2"; forecolor=orange; }
+  C { word="pict"; forecolor=pink; }
+}
+[EDGES] {
+  A -> B { color=red; }
+  C -> B { color=blue;}
+  B -> A { bottom; color=yellow; }
+  B -> C { bottom; color=green; }
+}

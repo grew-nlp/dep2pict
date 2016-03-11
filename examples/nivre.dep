@@ -1,0 +1,31 @@
+[GRAPH] {
+    background=#F9F9F9;
+    scale=200;
+    edge_label_size=8;
+    vspace=14;
+}
+ 
+[WORDS] {
+  w0 { word = "ROOT"; bold; }
+  w1 { word = "Economic"; }
+  w2 { word = "news"; }
+  w3 { word = "had"; }
+  w4 { word = "little"; }
+  w5 { word = "effect"; }
+  w6 { word = "on"; }
+  w7 { word = "financial"; }
+  w8 { word = "market"; }
+  w9 { word = "."; }
+}
+ 
+[EDGES] { 
+  w0 -> w3 {label = "PRED"; }
+  w2 -> w1 {label = "ATT"; }
+  w3 -> w2 {label = "SBJ"; }
+  w3 -> w5 {label = "OBJ"; }
+  w5 -> w4 {label = "ATT"; }
+  w5 -> w6 {label = "ATT"; }
+  w3 -> w9 {label = "PU"; }
+  w6 -> w8 {label = "PC"; }
+  w8 -> w7 {label = "ATT"; }
+}

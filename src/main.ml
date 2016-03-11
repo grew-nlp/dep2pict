@@ -1,5 +1,6 @@
 open Printf
 open Log
+open Conll
 open Dep2pict
 
 open Global
@@ -42,12 +43,7 @@ let usage = String.concat "\n" [
 ]
 
 
-let requested_sentid = ref None
-
-(* the name of the file containing special chars (like korean chars) *)
-let special_chars = ref None
-
-
+let first = ref true
 let rec parse_arg = function
   | [] -> ()
   | "-v"::_ | "--version"::_ -> printf "%s\n%!" version; exit 0
@@ -69,9 +65,9 @@ let rec parse_arg = function
 
   | anon :: tail ->
     begin
-      match !input_file with
-      | None -> input_file := Some anon
-      | Some _ ->
+      if !first
+      then (input_file := anon; first := false)
+      else
         match !output_file with
         | None -> output_file := Some anon
         | Some _ -> Log.fcritical "At most two anonymous arguments are allowed, don't know what to do with \"%s\"" anon
@@ -91,55 +87,32 @@ let _ =
   end;
 
   (* check for input_file and load file if any *)
-  begin
-    match !input_file with
-    | None -> ()
-    | Some in_file when not (Sys.file_exists in_file) -> Log.fcritical "The input file %s doesn't exist." in_file
-    | Some in_file -> load in_file
-  end;
-
-  (* check for focus *)
-  begin
-    match (!current_data, !current_position, !requested_sentid) with
-    | (Conll _, _, Some sentid) -> (
-      try search_sentid sentid
-      with Not_found ->
-        Log.fwarning "sentid %s cannot be found, set position to 0" sentid;
-        current_position := 0; update_source ()
-      )
-    | (Conll arr, p, None) when p < 0 || p >= (Array.length arr) ->
-      Log.fwarning "position %d is out of bounds, set position to 0" p;
-      current_position := 0; update_source ()
-    | (Conll _, p, None) -> current_position := p; update_source ()
-    | (_, _, Some _) -> Log.fcritical "Options --sentid can be used only with CONLL input"
-    | (_, _, None) -> ()
-  end;
-
-  match !output_file with
+    match !output_file with
     | None -> Gui.main ()
     | Some out_file ->
-      try
-        let graph = match !current_data with
-        | No_data -> critical "No input data loaded"
-        | Dep (g,_) -> g
-        | Conll _ -> Dep2pict.from_conll ~conll:(!current_source) in
-        begin
-          match Format.get out_file with
-          | Format.Svg -> Dep2pict.save_svg ~filename:out_file graph
-          | Format.Pdf -> Dep2pict.save_pdf ~filename:out_file graph
-          | Format.Png -> Dep2pict.save_png ~filename:out_file graph
-          | Format.Dep -> (
-            match (!current_data, !current_position) with
-            | (Conll arr, p) -> File.write out_file (Dep2pict.conll_to_dep ~conll:(snd arr.(p)))
-            | _ -> critical "<dep> output format is available only for <conll> inputs"
-          )
-          | f -> critical "<%s> is not a valid output format" (Format.to_string f)
-        end;
-        Log.finfo "File %s generated." out_file
-      with
-      | Dep2pict.Parse_error msgs -> List.iter (fun (l,m) -> printf "Line %d: %s\n" l m) msgs; critical "Parse error !!"
-      | Dep2pict.Id_already_in_use_ id -> critical "Id already used: %s" id
-      | Dep2pict.Conll_format msg -> critical "Invalid CONLL line: %s" msg
-      | Dep2pict.Unknown_index id -> critical "Can't find index: %s" id
-      | Dep2pict.Loop_in_dep msg -> critical "Loop in dependency: %s" msg
-      | exc -> critical "Unexpected exception <%s>, please report" (Printexc.to_string exc)
+        load !input_file;
+        set_position ();
+        try
+          let graph = match (!current_data, !current_position) with
+          | (Dep g,_) -> g
+          | (Conll arr, pos) -> Dep2pict.from_conll (snd arr.(pos)) in
+          begin
+            match Format.get out_file with
+            | Format.Svg -> Dep2pict.save_svg ~filename:out_file graph
+            | Format.Pdf -> Dep2pict.save_pdf ~filename:out_file graph
+            | Format.Png -> Dep2pict.save_png ~filename:out_file graph
+            | Format.Dep -> (
+              match (!current_data, !current_position) with
+              | (Conll arr, p) -> File.write out_file (Dep2pict.conll_to_dep ~conll:(snd arr.(p)))
+              | _ -> critical "<dep> output format is available only for <conll> inputs"
+            )
+            | f -> critical "<%s> is not a valid output format" (Format.to_string f)
+          end;
+          Log.finfo "File %s generated." out_file
+        with
+        | Dep2pict.Parse_error msgs -> List.iter (fun (l,m) -> printf "Line %d: %s\n" l m) msgs; critical "Parse error !!"
+        | Dep2pict.Id_already_in_use_ id -> critical "Id already used: %s" id
+        | Dep2pict.Conll_format msg -> critical "Invalid CONLL line: %s" msg
+        | Dep2pict.Unknown_index id -> critical "Can't find index: %s" id
+        | Dep2pict.Loop_in_dep msg -> critical "Loop in dependency: %s" msg
+        | exc -> critical "Unexpected exception <%s>, please report" (Printexc.to_string exc)
