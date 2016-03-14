@@ -19,9 +19,9 @@ datadir:
 
 install: native
 	cp main.native $(BINDIR)/dep2pict
-	mkdir -p $(DATA_DIR)
+	mkdir -p $(DATA_DIR)/examples
 	cp src/dep2pict.glade $(DATA_DIR)
-	cp -r examples $(DATA_DIR)
+	cp examples/*.dep examples/*.conll $(DATA_DIR)
 
 uninstall:
 	rm -f $(BINDIR)/dep2pict
