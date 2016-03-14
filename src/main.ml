@@ -8,7 +8,7 @@ open Global
 let version = VERSION
 
 let _ =
-  Log.set_active_levels [`INFO];
+  Log.set_active_levels [`INFO; `WARNING];
   Log.set_info_label "DEP2PICT";
   Log.set_critical_label "DEP2PICT";
   Log.set_write_to_log_file false;

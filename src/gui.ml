@@ -75,8 +75,9 @@ let main () =
       then (ui#scroll#hadjustment#set_value !user_hpos; user_hpos := 0.);
     true) in
 
-  let reload () =
+  let reload first =
     load !input_file;
+    if first then set_position ();
     input_last_modifaction_time := (let stat = Unix.stat !input_file in stat.Unix.st_mtime);
     user_hpos := ui#scroll#hadjustment#value; (* Hack (cf above) *)
     refresh_view () in
@@ -86,15 +87,10 @@ let main () =
     ~ms:1000
     ~callback:
       (fun () ->
-(*         begin
-          match !input_file with
-          | None -> ()
-          | Some filename ->
-            let stat = Unix.stat filename in
-            if stat.Unix.st_mtime > !input_last_modifaction_time
-            then reload ()
-        end;
- *)       true
+        let stat = Unix.stat !input_file in
+        if stat.Unix.st_mtime > !input_last_modifaction_time
+        then reload false;
+        true
      ) in
 
   (* -------------------------------------------------------------------------------- *)
@@ -111,7 +107,7 @@ let main () =
       match dialog#run () with
         | `OPEN ->
           (match dialog#filename with
-          | Some f -> input_file := f; reload ();
+          | Some f -> input_file := f; reload false;
           | None -> ())
         | `DELETE_EVENT | `CANCEL -> ()
     end ;
@@ -149,7 +145,7 @@ let main () =
     () in
 
 
-  let _ = ui#reload#connect#clicked ~callback:reload in
+  let _ = ui#reload#connect#clicked ~callback:(fun () -> reload false) in
   let _ = GMisc.image ~stock:`REFRESH ~packing: ui#reload_box#pack () in
 
   let _ = ui#open_button#connect#clicked ~callback:open_dep in
@@ -187,7 +183,7 @@ let main () =
       let modif = GdkEvent.Key.state ev in
       begin
         match modif with
-          | [`CONTROL] when key = _r -> reload ()
+          | [`CONTROL] when key = _r -> reload false
           | [`CONTROL] when key = _o -> open_dep ()
 
           | [] when key = _Left ->
@@ -207,6 +203,6 @@ let main () =
 
   ui#check_widgets ();
   ui#toplevel#show ();
-  reload ();
+  reload true; 
 
   GMain.Main.main ()

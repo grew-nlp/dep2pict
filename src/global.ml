@@ -54,7 +54,7 @@ module Format = struct
     match get_suffix file with 
     | None -> Log.fwarning "Cannot guess format (no suffix) for file \"%s\"" file; No_suff
     | Some suff -> 
-      try List.assoc suff [ (".dep",Dep); (".conll",Conll); (".png",Png); (".svg",Svg); (".pdf",Pdf)]
+      try List.assoc suff [ (".dep",Dep); (".conll",Conll); (".conllu",Conll); (".png",Png); (".svg",Svg); (".pdf",Pdf)]
       with Not_found -> Log.fwarning "Unkwnow file extension \"%s\" for file \"%s\"" suff file; Unk suff
 
   let to_string = function
@@ -93,34 +93,28 @@ let get_id () =
   | _ -> Log.critical "[get_id] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
+exception Found of int
 let array_assoc key array =
-  let len = Array.length array in
-  let rec loop i =
-    if i = len
-    then raise Not_found
-    else
-      match array.(i) with
-        | (k,v) when k=key -> (i,v)
-        | _ -> loop (i+1)
-  in loop 0
-
+  try 
+    Array.iteri (fun i (k,_) -> if k = key then raise (Found i)) array;
+    None
+  with Found i -> Some i
 
 (* -------------------------------------------------------------------------------- *)
 let search_sentid sentid =
   match !current_data with
   | Conll arr ->
-    let (new_pos,_) = array_assoc sentid arr in current_position := new_pos
+    begin
+      match array_assoc sentid arr with
+      | Some p -> current_position := p
+      | None -> Log.fwarning "No conll struct with name \"%s\"" sentid
+    end
   | _ -> Log.critical "[search_sentid] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
 let set_position () =
   match (!current_data, !current_position, !requested_sentid) with
-  | (Conll _, _, Some sentid) -> (
-    try search_sentid sentid
-    with Not_found ->
-      Log.fwarning "sentid %s cannot be found, set position to 0" sentid;
-      current_position := 0
-    )
+  | (Conll _, _, Some sentid) -> search_sentid sentid
   | (Conll arr, p, None) when p < 0 || p >= (Array.length arr) ->
     Log.fwarning "position %d is out of bounds, set position to 0" p;
     current_position := 0
