@@ -1,0 +1,4 @@
+#!/bin/sh
+rm -f src/dep2pict_glade.ml # force to rebuild with correct path
+make install PREFIX=/Users/guillaum/.local/
+mv -f /Users/guillaum/.local/bin/dep2pict /Users/guillaum/.local/bin/dep2pict_dev
