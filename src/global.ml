@@ -3,6 +3,8 @@ open Log
 open Conll
 open Dep2pict
 
+exception Found of int
+
 module File = struct
   let read file =
     let in_ch = open_in file in
@@ -35,7 +37,6 @@ let critical msg = ksprintf
     | false -> Log.fcritical "%s" m
   ) msg
 
-exception Found of int
   let get_suffix file_name =
   let len = String.length file_name in
     try
@@ -93,7 +94,6 @@ let get_id () =
   | _ -> Log.critical "[get_id] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
-exception Found of int
 let array_assoc key array =
   try 
     Array.iteri (fun i (k,_) -> if k = key then raise (Found i)) array;

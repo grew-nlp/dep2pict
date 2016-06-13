@@ -40,8 +40,7 @@ let main () =
 
   (* -------------------------------------------------------------------------------- *)
   let refresh_view () =
-    try
-      let graph = match (!current_data, !current_position) with
+    let graph = match (!current_data, !current_position) with
       | (Conll arr, p) -> Dep2pict.from_conll (snd arr.(p))
       | (Dep graph, _) -> graph in
 
@@ -57,14 +56,7 @@ let main () =
       let _ = ui#last_button#misc#set_sensitive (has_next ()) in
       ui#view_label#set_text (view_label ());
       ui#toplevel#set_title !input_file;
-    with
-      | Dep2pict.Parse_error msgs ->
-        ui#error_view#buffer#set_text
-          (String.concat "\n" (List.map (fun (l,m) -> sprintf "Line %d: %s" l m) msgs));
-      | Dep2pict.Id_already_in_use_ id -> ui#error_view#buffer#set_text ("Id already in use: "^id)
-      | Dep2pict.Unknown_index id -> ui#error_view#buffer#set_text ("Can't find index: "^id)
-      | Dep2pict.Loop_in_dep msg -> ui#error_view#buffer#set_text ("Loop in dependency: "^msg)
-      | Dep2pict.Conll_format msg -> ui#error_view#buffer#set_text ("Conll format: "^msg) in
+      () in
 
   (* -------------------------------------------------------------------------------- *)
   (* Hack to keep the horizontal position *)
@@ -76,11 +68,23 @@ let main () =
     true) in
 
   let reload first =
+      try
+
     load !input_file;
     if first then set_position ();
     input_last_modifaction_time := (let stat = Unix.stat !input_file in stat.Unix.st_mtime);
     user_hpos := ui#scroll#hadjustment#value; (* Hack (cf above) *)
-    refresh_view () in
+    refresh_view () 
+    with
+      | Dep2pict.Parse_error msgs ->
+        ui#error_view#buffer#set_text
+          (String.concat "\n" (List.map (fun (l,m) -> sprintf "Line %d: %s" l m) msgs));
+      | Dep2pict.Id_already_in_use_ id -> ui#error_view#buffer#set_text ("Id already in use: "^id)
+      | Dep2pict.Unknown_index id -> ui#error_view#buffer#set_text ("Can't find index: "^id)
+      | Dep2pict.Loop_in_dep msg -> ui#error_view#buffer#set_text ("Loop in dependency: "^msg)
+      | Dep2pict.Conll_format msg -> ui#error_view#buffer#set_text ("Conll format: "^msg)
+      | Conll.Error msg ->  ui#error_view#buffer#set_text ("XXX: "^ msg) in
+
 
   (* check if file has changed *)
   let _ = GMain.Timeout.add
