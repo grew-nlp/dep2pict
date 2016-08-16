@@ -11,11 +11,14 @@ remove: [
   ["make" "uninstall" "PREFIX=%{prefix}%"]
 ]
 depends: [
+  "cppo"
   "ANSITerminal"
   "libcaml-log"
   "cairo2"
   "camomile"
+  "libcaml-dep2pict"
+]
+depopts: [
   "lablgtk"
   "lablwebkit"
-  "libcaml-dep2pict"
 ]

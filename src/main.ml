@@ -22,9 +22,11 @@ let usage = String.concat "\n" [
   "=-=-=-=-= dep2pict: a tool to draw dependency graphs =-=-=-=-=";
   "";
   "Usage:";
-  "  * dep2pict <options> input_file output_file    convert input_file into output_file" ;
+  "  * dep2pict <options> input_file output_file    convert input_file into output_file";
+#ifdef GUI
   "  * dep2pict <options> input_file                run the GUI with the given file";
   "  * dep2pict <options>                           run the GUI with an empty graph";
+#endif
   "  * dep2pict (-h | --help)                       display this help";
   "  * dep2pict (-v | --version)                    display version number ("^version^")";
 
@@ -88,7 +90,12 @@ let _ =
 
   (* check for input_file and load file if any *)
     match !output_file with
-    | None -> Gui.main ()
+    | None -> 
+#ifdef GUI
+    Gui.main ()
+#else
+    Log.warning "Dep2pict was compiled without lablwebkit, the GUI in not available"; exit 0
+#endif
     | Some out_file ->
         load !input_file;
         set_position ();
