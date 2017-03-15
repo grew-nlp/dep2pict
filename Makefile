@@ -22,7 +22,7 @@ native_nogui:
 	echo "no" > GUI
 	$(OCB) main.native
 
-native_gui: src/dep2pict_glade.ml
+native_gui: src/dep2pict_glade.ml datadir
 	echo "yes" > GUI
 	sed -iback 's|src/dep2pict.glade|$(DATA_DIR)dep2pict.glade|g' src/dep2pict_glade.ml
 	rm -f src/dep2pict_glade.mlback

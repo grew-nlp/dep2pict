@@ -74,7 +74,7 @@ let main () =
     if first then set_position ();
     input_last_modifaction_time := (let stat = Unix.stat !input_file in stat.Unix.st_mtime);
     user_hpos := ui#scroll#hadjustment#value; (* Hack (cf above) *)
-    refresh_view () 
+    refresh_view ()
     with
       | Dep2pict.Parse_error msgs ->
         ui#error_view#buffer#set_text
@@ -83,7 +83,7 @@ let main () =
       | Dep2pict.Unknown_index id -> ui#error_view#buffer#set_text ("Can't find index: "^id)
       | Dep2pict.Loop_in_dep msg -> ui#error_view#buffer#set_text ("Loop in dependency: "^msg)
       | Dep2pict.Conll_format msg -> ui#error_view#buffer#set_text ("Conll format: "^msg)
-      | Conll.Error msg ->  ui#error_view#buffer#set_text ("XXX: "^ msg) in
+      | Conll_types.Error msg ->  ui#error_view#buffer#set_text ("XXX: "^ msg) in
 
 
   (* check if file has changed *)
@@ -207,6 +207,6 @@ let main () =
 
   ui#check_widgets ();
   ui#toplevel#show ();
-  reload true; 
+  reload true;
 
   GMain.Main.main ()
