@@ -90,7 +90,7 @@ let _ =
 
   (* check for input_file and load file if any *)
     match !output_file with
-    | None -> 
+    | None ->
 #ifdef GUI
     Gui.main ()
 #else

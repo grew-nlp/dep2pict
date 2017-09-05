@@ -52,9 +52,9 @@ module Format = struct
   type format =  Dep | Conll | Png | Svg | Pdf | No_suff | Unk of string
 
   let get file =
-    match get_suffix file with 
+    match get_suffix file with
     | None -> Log.fwarning "Cannot guess format (no suffix) for file \"%s\"" file; No_suff
-    | Some suff -> 
+    | Some suff ->
       try List.assoc suff [ (".dep",Dep); (".conll",Conll); (".conllu",Conll); (".png",Png); (".svg",Svg); (".pdf",Pdf)]
       with Not_found -> Log.fwarning "Unkwnow file extension \"%s\" for file \"%s\"" suff file; Unk suff
 
@@ -95,7 +95,7 @@ let get_id () =
 
 (* -------------------------------------------------------------------------------- *)
 let array_assoc key array =
-  try 
+  try
     Array.iteri (fun i (k,_) -> if k = key then raise (Found i)) array;
     None
   with Found i -> Some i
@@ -135,7 +135,7 @@ let last () =
   | _ -> Log.critical "[last] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
-let next () = 
+let next () =
   match (!current_data, !current_position) with
     | (Conll arr, p)  when p < (Array.length arr) - 1 ->
       current_position := p+1
@@ -148,14 +148,14 @@ let has_next () =
     | _ -> false
 
 (* -------------------------------------------------------------------------------- *)
-let prev () = 
+let prev () =
   match (!current_data, !current_position) with
     | (Conll _, p)  when p > 0 ->
       current_position := p-1
   | _ -> Log.critical "[prev] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
-let has_prev () = 
+let has_prev () =
   match (!current_data, !current_position) with
     | (Conll _, p) -> p > 0
     | _ -> false
