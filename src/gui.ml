@@ -83,7 +83,7 @@ let main () =
       | Dep2pict.Unknown_index id -> ui#error_view#buffer#set_text ("Can't find index: "^id)
       | Dep2pict.Loop_in_dep msg -> ui#error_view#buffer#set_text ("Loop in dependency: "^msg)
       | Dep2pict.Conll_format msg -> ui#error_view#buffer#set_text ("Conll format: "^msg)
-      | Conll_types.Error msg ->  ui#error_view#buffer#set_text ("XXX: "^ msg) in
+      | Conll_types.Error json -> ui#error_view#buffer#set_text (Yojson.Basic.pretty_to_string json) in
 
 
   (* check if file has changed *)

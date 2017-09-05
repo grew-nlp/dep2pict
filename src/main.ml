@@ -97,9 +97,9 @@ let _ =
     Log.warning "Dep2pict was compiled without lablwebkit, the GUI in not available"; exit 0
 #endif
     | Some out_file ->
+    try
         load !input_file;
         set_position ();
-        try
           let graph = match (!current_data, !current_position) with
           | (Dep g,_) -> g
           | (Conll arr, pos) -> Dep2pict.from_conll (snd arr.(pos)) in
@@ -122,4 +122,5 @@ let _ =
         | Dep2pict.Conll_format msg -> critical "Invalid CONLL line: %s" msg
         | Dep2pict.Unknown_index id -> critical "Can't find index: %s" id
         | Dep2pict.Loop_in_dep msg -> critical "Loop in dependency: %s" msg
+        | Conll_types.Error json -> critical "%s" (Yojson.Basic.pretty_to_string json)
         | exc -> critical "Unexpected exception <%s>, please report" (Printexc.to_string exc)
