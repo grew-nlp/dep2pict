@@ -41,7 +41,7 @@ let main () =
   (* -------------------------------------------------------------------------------- *)
   let refresh_view () =
     let graph = match (!current_data, !current_position) with
-      | (Conll arr, p) -> Dep2pict.from_conll (snd arr.(p))
+      | (Conll arr, p) -> Dep2pict.from_conll ~rtl:!rtl ~conll:(snd arr.(p))
       | (Dep graph, _) -> graph in
 
     let svg = Dep2pict.to_svg graph in
@@ -133,7 +133,7 @@ let main () =
       ~callback:(fun () ->
         begin
           let graph = match (!current_data, !current_position) with
-          | (Conll arr, p) -> Dep2pict.from_conll (snd arr.(p))
+          | (Conll arr, p) -> Dep2pict.from_conll ~rtl:!rtl ~conll:(snd arr.(p))
           | (Dep graph, _) -> graph in
 
           match format with

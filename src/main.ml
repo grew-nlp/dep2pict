@@ -63,6 +63,7 @@ let rec parse_arg = function
 
   | "-b"::tail | "--batch"::tail -> batch := true; parse_arg tail
 
+  | "-rtl":: tail | "--right_to_left":: tail -> rtl := true; parse_arg tail
   | s::_ when s.[0] = '-' -> Log.fcritical "Unknwon option \"%s\"" s
 
   | anon :: tail ->
@@ -102,7 +103,7 @@ let _ =
         set_position ();
           let graph = match (!current_data, !current_position) with
           | (Dep g,_) -> g
-          | (Conll arr, pos) -> Dep2pict.from_conll (snd arr.(pos)) in
+          | (Conll arr, pos) -> Dep2pict.from_conll ~rtl:!rtl ~conll:(snd arr.(pos)) in
           begin
             match Format.get out_file with
             | Format.Svg -> Dep2pict.save_svg ~filename:out_file graph

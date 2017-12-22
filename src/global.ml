@@ -30,6 +30,7 @@ end (* module File *)
 
 
 let batch = ref false
+let rtl = ref false
 
 let critical msg = ksprintf
   (fun m -> match !batch  with
