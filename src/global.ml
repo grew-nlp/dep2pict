@@ -50,13 +50,13 @@ let critical msg = ksprintf
     | Found i -> Some (String.sub file_name i (len-i))
 
 module Format = struct
-  type format =  Dep | Conll | Png | Svg | Pdf | No_suff | Unk of string
+  type format =  Dep | Conll | Png | Svg | Pdf | Json | No_suff | Unk of string
 
   let get file =
     match get_suffix file with
     | None -> Log.fwarning "Cannot guess format (no suffix) for file \"%s\"" file; No_suff
     | Some suff ->
-      try List.assoc suff [ (".dep",Dep); (".conll",Conll); (".conllu",Conll); (".png",Png); (".svg",Svg); (".pdf",Pdf)]
+      try List.assoc suff [ (".dep",Dep); (".conll",Conll); (".conllu",Conll); (".png",Png); (".svg",Svg); (".pdf",Pdf); (".json",Json)]
       with Not_found -> Log.fwarning "Unkwnow file extension \"%s\" for file \"%s\"" suff file; Unk suff
 
   let to_string = function
@@ -65,6 +65,7 @@ module Format = struct
     | Png -> "png"
     | Svg -> "svg"
     | Pdf -> "pdf"
+    | Json -> "json"
     | No_suff -> "no_suff"
     | Unk suff -> sprintf "unknown suffix '%s'" suff
 end

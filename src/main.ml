@@ -77,6 +77,35 @@ let rec parse_arg = function
     end;
     parse_arg tail
 
+let json_apply json_in json_out =
+  match json_in with
+  | `List l ->
+    let (new_json : Yojson.Basic.json) = `List (List.map (
+      function
+      | `Assoc item ->
+      begin
+         match List.assoc_opt "dep_file" item with
+         | Some (`String dep_file) ->
+          let out_file = (Filename.chop_extension dep_file) ^ ".svg" in
+          let dep = Dep2pict.from_dep (File.read dep_file) in
+          Dep2pict.save_svg ~filename:out_file dep;
+          let new_fields =
+            match Dep2pict.highlight_shift () with
+            | Some f -> [("svg_file", `String out_file); ("shift", `Float f)]
+            | None -> [("svg_file", `String out_file)] in
+          `Assoc (item @ new_fields)
+         | _ -> Log.warning "Json items should contain a \"del_file\" field"; exit 0
+      end
+      | _ -> Log.warning "Json input file should be a list of Assoc list"; exit 0
+      ) l) in
+      let out_ch = open_out json_out in
+      Printf.fprintf out_ch "%s\n" (Yojson.Basic.pretty_to_string (new_json));
+      close_out out_ch
+  | _ -> Log.warning "Json input file should be a list"; exit 0
+  (* (Yojson.Basic.pretty_to_string json) *)
+
+
+
 (* -------------------------------------------------------------------------------- *)
 let _ =
   let () = parse_arg (List.tl (Array.to_list Sys.argv)) in
@@ -98,6 +127,9 @@ let _ =
     Log.warning "Dep2pict was compiled without lablwebkit, the GUI in not available"; exit 0
 #endif
     | Some out_file ->
+    if (Format.get !input_file) = Format.Json
+    then json_apply (Yojson.Basic.from_file !input_file) out_file
+    else
     try
         load !input_file;
         set_position ();
