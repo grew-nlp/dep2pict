@@ -29,12 +29,27 @@ let write file string =
 end (* module File *)
 
 
+exception Error of Yojson.Basic.json
+
+let error ?file ?line ?fct ?data msg =
+  let opt_list = [
+    Some ("message", `String msg);
+    (CCOpt.map (fun x -> ("file", `String x)) file);
+    (CCOpt.map (fun x -> ("line", `Int x)) line);
+    Some ("program", `String "dep2pict");
+    (CCOpt.map (fun x -> ("function", `String x)) fct);
+    (CCOpt.map (fun x -> ("data", `String x)) data);
+  ] in
+  let json = `Assoc (CCList.filter_map (fun x->x) opt_list) in
+  raise (Error json)
+
+
 let batch = ref false
 let rtl = ref false
 
 let critical msg = ksprintf
   (fun m -> match !batch  with
-    | true -> printf "%s\n" m; exit 1
+    | true -> eprintf "%s\n" m; exit 1
     | false -> Log.fcritical "%s" m
   ) msg
 
@@ -109,7 +124,7 @@ let search_sentid sentid =
     begin
       match array_assoc sentid arr with
       | Some p -> current_position := p
-      | None -> Log.fwarning "No conll struct with name \"%s\"" sentid
+      | None -> Log.fcritical "No conll struct with name \"%s\"" sentid
     end
   | _ -> Log.critical "[search_sentid] can be use only with CONLL data"
 
@@ -176,18 +191,12 @@ let view_label () =
 
 (* -------------------------------------------------------------------------------- *)
 let load file =
-  try
-    match Format.get file with
-    | Format.Dep -> let dep = File.read file in current_data := Dep (Dep2pict.from_dep dep)
-    | Format.Conll -> current_data := Conll (Conll_corpus.load file)
-    | _ ->
-      Log.fwarning "No valid input format detected for file \"%s\", try to guess...\n%!" file;
-      let text = File.read file in
-      if String.length text > 0 && (text.[0] = '1' || text.[0] = '#')
-      then current_data := Conll (Conll_corpus.load file)
-      else current_data := Dep (Dep2pict.from_dep text)
-  with
-  | Dep2pict.Parse_error msgs -> List.iter (fun (l,m) -> printf "Line %d: %s\n" l m) msgs; critical "Parse error !!"
-  | Dep2pict.Id_already_in_use_ id -> critical "Id already in use : %s" id
-  | Dep2pict.Unknown_index id -> critical "Can't find index: %s" id
-  | Dep2pict.Loop_in_dep msg -> critical "Loop in dependency : %s" msg
+  match Format.get file with
+  | Format.Dep -> let dep = File.read file in current_data := Dep (Dep2pict.from_dep dep)
+  | Format.Conll -> current_data := Conll (Conll_corpus.load file)
+  | _ ->
+    Log.fwarning "No valid input format detected for file \"%s\", try to guess...\n%!" file;
+    let text = File.read file in
+    if String.length text > 0 && (text.[0] = '1' || text.[0] = '#')
+    then current_data := Conll (Conll_corpus.load file)
+    else current_data := Dep (Dep2pict.from_dep text)

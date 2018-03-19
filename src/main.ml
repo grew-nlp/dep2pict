@@ -61,7 +61,7 @@ let rec parse_arg = function
 
   | "-d"::tail | "--debug"::tail -> debug := true; parse_arg tail
 
-  | "-b"::tail | "--batch"::tail -> batch := true; parse_arg tail
+  | "-b"::tail | "--batch"::tail -> Log.set_active_levels []; batch := true; parse_arg tail
 
   | "-rtl":: tail | "--right_to_left":: tail -> rtl := true; parse_arg tail
   | s::_ when s.[0] = '-' -> Log.fcritical "Unknwon option \"%s\"" s
@@ -104,10 +104,8 @@ let json_apply json_in json_out =
   | _ -> Log.warning "Json input file should be a list"; exit 0
   (* (Yojson.Basic.pretty_to_string json) *)
 
-
-
 (* -------------------------------------------------------------------------------- *)
-let _ =
+let main () =
   let () = parse_arg (List.tl (Array.to_list Sys.argv)) in
 
   if !debug then Dep2pict.set_verbose ();
@@ -127,15 +125,17 @@ let _ =
     Log.warning "Dep2pict was compiled without lablwebkit, the GUI in not available"; exit 0
 #endif
     | Some out_file ->
-    if (Format.get !input_file) = Format.Json
-    then json_apply (Yojson.Basic.from_file !input_file) out_file
-    else
-    try
+      if (Format.get !input_file) = Format.Json
+      then json_apply (Yojson.Basic.from_file !input_file) out_file
+      else
+      try
         load !input_file;
-        set_position ();
           let graph = match (!current_data, !current_position) with
           | (Dep g,_) -> g
-          | (Conll arr, pos) -> Dep2pict.from_conll ~rtl:!rtl ~conll:(snd arr.(pos)) in
+          | (Conll [||],_) -> error ~file: !input_file "Empty Conll file"
+          | (Conll arr, pos) ->
+          set_position ();
+          Dep2pict.from_conll ~rtl:!rtl ~conll:(snd arr.(pos)) in
           begin
             match Format.get out_file with
             | Format.Svg -> Dep2pict.save_svg ~filename:out_file graph
@@ -149,11 +149,13 @@ let _ =
             | f -> critical "<%s> is not a valid output format" (Format.to_string f)
           end;
           Log.finfo "File %s generated." out_file
-        with
-        | Dep2pict.Parse_error msgs -> List.iter (fun (l,m) -> printf "Line %d: %s\n" l m) msgs; critical "Parse error !!"
-        | Dep2pict.Id_already_in_use_ id -> critical "Id already used: %s" id
-        | Dep2pict.Conll_format msg -> critical "Invalid CONLL line: %s" msg
-        | Dep2pict.Unknown_index id -> critical "Can't find index: %s" id
-        | Dep2pict.Loop_in_dep msg -> critical "Loop in dependency: %s" msg
-        | Conll_types.Error json -> critical "%s" (Yojson.Basic.pretty_to_string json)
-        | exc -> critical "Unexpected exception <%s>, please report" (Printexc.to_string exc)
+      with
+      | Error json -> raise (Error json)
+      | Dep2pict.Error json -> raise (Error json)
+      | Conll_types.Error json -> raise (Error json)
+      | Sys_error data -> error ~file: !input_file ~data "Sys_error"
+      | exc -> error ~file: !input_file ~data:(Printexc.to_string exc) "Unexpected exception, please report"
+
+let _ =
+  try main ()
+  with Error json -> critical "%s" (Yojson.Basic.pretty_to_string json)

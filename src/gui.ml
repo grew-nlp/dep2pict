@@ -76,14 +76,8 @@ let main () =
     user_hpos := ui#scroll#hadjustment#value; (* Hack (cf above) *)
     refresh_view ()
     with
-      | Dep2pict.Parse_error msgs ->
-        ui#error_view#buffer#set_text
-          (String.concat "\n" (List.map (fun (l,m) -> sprintf "Line %d: %s" l m) msgs));
-      | Dep2pict.Id_already_in_use_ id -> ui#error_view#buffer#set_text ("Id already in use: "^id)
-      | Dep2pict.Unknown_index id -> ui#error_view#buffer#set_text ("Can't find index: "^id)
-      | Dep2pict.Loop_in_dep msg -> ui#error_view#buffer#set_text ("Loop in dependency: "^msg)
-      | Dep2pict.Conll_format msg -> ui#error_view#buffer#set_text ("Conll format: "^msg)
-      | Conll_types.Error json -> ui#error_view#buffer#set_text (Yojson.Basic.pretty_to_string json) in
+      | Conll_types.Error json -> ui#error_view#buffer#set_text (Yojson.Basic.pretty_to_string json)
+      | Dep2pict.Error json -> ui#error_view#buffer#set_text (Yojson.Basic.pretty_to_string json) in
 
 
   (* check if file has changed *)
