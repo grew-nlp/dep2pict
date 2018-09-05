@@ -130,11 +130,11 @@ let main () =
       else
       try
         load !input_file;
+          set_position ();
           let graph = match (!current_data, !current_position) with
           | (Dep g,_) -> g
           | (Conll [||],_) -> error ~file: !input_file "Empty Conll file"
           | (Conll arr, pos) ->
-          set_position ();
           Dep2pict.from_conll ~rtl:!rtl ~conll:(snd arr.(pos)) in
           begin
             match Format.get out_file with
