@@ -57,6 +57,9 @@ let rec parse_arg = function
   | "-s"::s::tail
   | "--sentid"::s::tail -> requested_sentid := Some s; parse_arg tail
 
+  (* does nothing (allow to pyqt to check for existence of the program) *)
+  | "--check"::_ -> exit 0
+
   | "--special_chars"::s::tail -> special_chars := Some s; parse_arg tail
 
   | "-d"::tail | "--debug"::tail -> debug := true; parse_arg tail
