@@ -14,7 +14,6 @@ depends: [
   "cppo"
   "ANSITerminal"
   "libcaml-log"
-  "cairo2"
   "camomile"
   "libcaml-dep2pict"
 ]
