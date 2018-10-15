@@ -23,10 +23,6 @@ let usage = String.concat "\n" [
   "";
   "Usage:";
   "  * dep2pict <options> input_file output_file    convert input_file into output_file";
-#ifdef GUI
-  "  * dep2pict <options> input_file                run the GUI with the given file";
-  "  * dep2pict <options>                           run the GUI with an empty graph";
-#endif
   "  * dep2pict (-h | --help)                       display this help";
   "  * dep2pict (-v | --version)                    display version number ("^version^")";
 
@@ -121,12 +117,7 @@ let main () =
 
   (* check for input_file and load file if any *)
     match !output_file with
-    | None ->
-#ifdef GUI
-    Gui.main ()
-#else
-    Log.warning "Dep2pict was compiled without lablwebkit, the GUI in not available"; exit 0
-#endif
+    | None -> failwith "TODO call gui"
     | Some out_file ->
       if (Format.get !input_file) = Format.Json
       then json_apply (Yojson.Basic.from_file !input_file) out_file

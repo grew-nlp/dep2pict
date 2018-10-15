@@ -1,2 +1,1 @@
-A command line program to draw linguistic dependencies (see dep2pict.loria.fr).
-If lablwebkit is available at compilation time, a GTK GUI is also available.
+A command line program to draw linguistic dependencies (see dep2pict.loria.fr)
