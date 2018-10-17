@@ -105,7 +105,8 @@ let json_apply json_in json_out =
 
 (* -------------------------------------------------------------------------------- *)
 let main () =
-  let () = parse_arg (List.tl (Array.to_list Sys.argv)) in
+  let arg_list = List.tl (Array.to_list Sys.argv) in
+  let () = parse_arg arg_list in
 
   if !debug then Dep2pict.set_verbose ();
 
@@ -117,7 +118,12 @@ let main () =
 
   (* check for input_file and load file if any *)
     match !output_file with
-    | None -> failwith "TODO call gui"
+    | None ->
+      begin
+        match Unix.system ("dep2pict_qt" ^ " " ^ (String.concat " " arg_list)) with
+          | Unix.WEXITED 127 -> Log.warning "It seems that dep2pict_qt is not installed on your system. See [http://dep2pict.loria.fr/installation] for more information"
+          | _ -> ()
+        end
     | Some out_file ->
       if (Format.get !input_file) = Format.Json
       then json_apply (Yojson.Basic.from_file !input_file) out_file

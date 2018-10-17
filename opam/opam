@@ -17,7 +17,3 @@ depends: [
   "camomile"
   "libcaml-dep2pict"
 ]
-depopts: [
-  "lablgtk"
-  "lablwebkit"
-]
