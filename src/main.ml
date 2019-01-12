@@ -53,7 +53,7 @@ let rec parse_arg = function
   | "-s"::s::tail
   | "--sentid"::s::tail -> requested_sentid := Some s; parse_arg tail
 
-  (* does nothing (allow to pyqt to check for existence of the program) *)
+  (* does nothing (used by dep2pict-gui to check for existence of dep2pict program) *)
   | "--check"::_ -> exit 0
 
   | "--special_chars"::s::tail -> special_chars := Some s; parse_arg tail
@@ -120,8 +120,8 @@ let main () =
     match !output_file with
     | None ->
       begin
-        match Unix.system ("dep2pict_qt" ^ " " ^ (String.concat " " arg_list)) with
-          | Unix.WEXITED 127 -> Log.warning "It seems that dep2pict_qt is not installed on your system. See [http://dep2pict.loria.fr/installation] for more information"
+        match Unix.system ("dep2pict-gui" ^ " " ^ (String.concat " " arg_list)) with
+          | Unix.WEXITED 127 -> Log.warning "It seems that dep2pict-gui is not installed on your system. See [http://dep2pict.loria.fr/installation] for more information"
           | _ -> ()
         end
     | Some out_file ->
