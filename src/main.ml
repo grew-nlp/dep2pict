@@ -62,6 +62,8 @@ let rec parse_arg = function
 
   | "-b"::tail | "--batch"::tail -> Log.set_active_levels []; batch := true; parse_arg tail
 
+  | "--show_root"::tail -> show_root := true; parse_arg tail
+
   | "-rtl":: tail | "--right_to_left":: tail -> rtl := true; parse_arg tail
   | s::_ when s.[0] = '-' -> Log.fcritical "Unknwon option \"%s\"" s
 
@@ -135,7 +137,7 @@ let main () =
           | (Dep g,_) -> g
           | (Conll [||],_) -> error ~file: !input_file "Empty Conll file"
           | (Conll arr, pos) ->
-          Dep2pict.from_conll ~rtl:!rtl ~conll:(snd arr.(pos)) in
+          Dep2pict.from_conll ~show_root: !show_root ~rtl:!rtl ~conll:(snd arr.(pos)) in
           begin
             match Format.get out_file with
             | Format.Svg -> Dep2pict.save_svg ~filename:out_file graph
@@ -143,7 +145,7 @@ let main () =
             | Format.Png -> Dep2pict.save_png ~filename:out_file graph
             | Format.Dep -> (
               match (!current_data, !current_position) with
-              | (Conll arr, p) -> File.write out_file (Dep2pict.conll_to_dep ~conll:(snd arr.(p)))
+              | (Conll arr, p) -> File.write out_file (Dep2pict.conll_to_dep ~show_root: !show_root ~conll:(snd arr.(p)))
               | _ -> critical "<dep> output format is available only for <conll> inputs"
             )
             | f -> critical "<%s> is not a valid output format" (Format.to_string f)
