@@ -81,7 +81,7 @@ let rec parse_arg = function
 let json_apply json_in json_out =
   match json_in with
   | `List l ->
-    let (new_json : Yojson.Basic.json) = `List (List.map (
+    let (new_json : Yojson.Basic.t) = `List (List.map (
       function
       | `Assoc item ->
       begin

@@ -29,7 +29,7 @@ let write file string =
 end (* module File *)
 
 
-exception Error of Yojson.Basic.json
+exception Error of Yojson.Basic.t
 
 let error ?file ?line ?fct ?data msg =
   let opt_list = [
