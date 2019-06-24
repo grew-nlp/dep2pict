@@ -154,7 +154,7 @@ let main () =
       with
       | Error json -> raise (Error json)
       | Dep2pict.Error json -> raise (Error json)
-      | Conll_types.Error json -> raise (Error json)
+      | Conll_error json -> raise (Error json)
       | Sys_error data -> error ~file: !input_file ~data "Sys_error"
       | exc -> error ~file: !input_file ~data:(Printexc.to_string exc) "Unexpected exception, please report"
 
