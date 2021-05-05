@@ -16,6 +16,7 @@ depends: [
   "libcaml-log"
   "camomile"
   "libcaml-dep2pict"
+  "libcaml-grew"
 ]
 synopsis: "A command line program to draw linguistic dependencies (see dep2pict.loria.fr)"
 url {

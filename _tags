@@ -1,1 +1,1 @@
-true:	package(containers, str, ANSITerminal, yojson, camomile, cairo2, log, conll, dep2pict)
+true:	package(containers, str, ANSITerminal, yojson, camomile, cairo2, log, conll, dep2pict, amr, libgrew)

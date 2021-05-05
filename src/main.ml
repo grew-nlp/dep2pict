@@ -1,7 +1,8 @@
 open Printf
 open Log
-open Conll
 open Dep2pict
+open Conllx
+open Libgrew
 
 open Global
 
@@ -136,8 +137,7 @@ let main () =
           let graph = match (!current_data, !current_position) with
           | (Dep g,_) -> g
           | (Conll [||],_) -> error ~file: !input_file "Empty Conll file"
-          | (Conll arr, pos) ->
-          Dep2pict.from_conll ~show_root: !show_root ~rtl:!rtl ~conll:(snd arr.(pos)) in
+          | (Conll arr, pos) -> snd arr.(pos) |> Conllx.to_json |> Graph.of_json |> Graph.to_dep ~config:(Conllx_config.build "ud") |> (fun d -> Dep2pict.from_dep d) in
           begin
             match Format.get out_file with
             | Format.Svg -> Dep2pict.save_svg ~filename:out_file graph
@@ -145,7 +145,9 @@ let main () =
             | Format.Png -> Dep2pict.save_png ~filename:out_file graph
             | Format.Dep -> (
               match (!current_data, !current_position) with
-              | (Conll arr, p) -> File.write out_file (Dep2pict.conll_to_dep ~show_root: !show_root ~conll:(snd arr.(p)))
+              | (Conll arr, p) ->
+              let dep = snd arr.(p) |> Conllx.to_json |> Graph.of_json |> Graph.to_dep ~config:(Conllx_config.build "ud") in
+                File.write out_file dep
               | _ -> critical "<dep> output format is available only for <conll> inputs"
             )
             | f -> critical "<%s> is not a valid output format" (Format.to_string f)
@@ -154,7 +156,7 @@ let main () =
       with
       | Error json -> raise (Error json)
       | Dep2pict.Error json -> raise (Error json)
-      | Conll_error json -> raise (Error json)
+      | Conllx_error json -> raise (Error json)
       | Sys_error data -> error ~file: !input_file ~data "Sys_error"
       | exc -> error ~file: !input_file ~data:(Printexc.to_string exc) "Unexpected exception, please report"
 
