@@ -194,7 +194,7 @@ let view_label () =
 let load file =
   match Format.get file with
   | Format.Dep -> let dep = File.read file in current_data := Dep (Dep2pict.from_dep dep)
-  | Format.Conll -> current_data := Conll (Conllx_corpus.get_data (Conllx_corpus.load file))
+  | Format.Conll -> current_data := Conll (Conllx_corpus.get_data (Conllx_corpus.load ~config:(Conllx_config.build "ud") file))
   | _ ->
     Log.fwarning "No valid input format detected for file \"%s\", try to guess...\n%!" file;
     let text = File.read file in
