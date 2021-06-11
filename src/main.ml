@@ -71,7 +71,7 @@ let rec parse_arg = function
   | anon :: tail ->
     begin
       if !first
-      then (input_file := anon; first := false)
+      then (input_file := Some anon; first := false)
       else
         match !output_file with
         | None -> output_file := Some anon
@@ -106,6 +106,10 @@ let json_apply json_in json_out =
   | _ -> Log.warning "Json input file should be a list"; exit 0
   (* (Yojson.Basic.pretty_to_string json) *)
 
+let filter = function
+  | "wordform" | "textform" -> false
+  | _ -> true
+
 (* -------------------------------------------------------------------------------- *)
 let main () =
   let arg_list = List.tl (Array.to_list Sys.argv) in
@@ -119,25 +123,19 @@ let main () =
     | Some filename -> Dep2pict.load_special_chars filename
   end;
 
-  (* check for input_file and load file if any *)
-    match !output_file with
-    | None ->
-      begin
-        match Unix.system ("dep2pict-gui" ^ " " ^ (String.concat " " arg_list)) with
-          | Unix.WEXITED 127 -> Log.warning "It seems that dep2pict-gui is not installed on your system. See [http://dep2pict.loria.fr/installation] for more information"
-          | _ -> ()
-        end
-    | Some out_file ->
-      if (Format.get !input_file) = Format.Json
-      then json_apply (Yojson.Basic.from_file !input_file) out_file
+    match (!input_file, !output_file) with
+    | (None,_) | (_,None) -> Log.warning "Two main arguments needed"; printf "%s\n%!" usage; exit 0
+    | (Some in_file, Some out_file) ->
+      if (Format.get in_file) = Format.Json
+      then json_apply (Yojson.Basic.from_file in_file) out_file
       else
       try
-        load !input_file;
+        load in_file;
           set_position ();
           let graph = match (!current_data, !current_position) with
           | (Dep g,_) -> g
-          | (Conll [||],_) -> error ~file: !input_file "Empty Conll file"
-          | (Conll arr, pos) -> snd arr.(pos) |> Conllx.to_json |> Graph.of_json |> Graph.to_dep ~config:(Conllx_config.build "ud") |> (fun d -> Dep2pict.from_dep d) in
+          | (Conll [||],_) -> error ~file: in_file "Empty Conll file"
+          | (Conll arr, pos) -> snd arr.(pos) |> Conllx.to_json |> Graph.of_json |> Graph.to_dep ~filter ~config:(Conllx_config.build "ud") |> (fun d -> Dep2pict.from_dep d) in
           begin
             match Format.get out_file with
             | Format.Svg -> Dep2pict.save_svg ~filename:out_file graph
@@ -146,7 +144,7 @@ let main () =
             | Format.Dep -> (
               match (!current_data, !current_position) with
               | (Conll arr, p) ->
-              let dep = snd arr.(p) |> Conllx.to_json |> Graph.of_json |> Graph.to_dep ~config:(Conllx_config.build "ud") in
+              let dep = snd arr.(p) |> Conllx.to_json |> Graph.of_json |> Graph.to_dep ~filter ~config:(Conllx_config.build "ud") in
                 File.write out_file dep
               | _ -> critical "<dep> output format is available only for <conll> inputs"
             )
@@ -157,8 +155,8 @@ let main () =
       | Error json -> raise (Error json)
       | Dep2pict.Error json -> raise (Error json)
       | Conllx_error json -> raise (Error json)
-      | Sys_error data -> error ~file: !input_file ~data "Sys_error"
-      | exc -> error ~file: !input_file ~data:(Printexc.to_string exc) "Unexpected exception, please report"
+      | Sys_error data -> error ~file: in_file ~data "Sys_error"
+      | exc -> error ~file: in_file ~data:(Printexc.to_string exc) "Unexpected exception, please report"
 
 let _ =
   try main ()

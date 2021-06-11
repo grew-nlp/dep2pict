@@ -87,7 +87,8 @@ module Format = struct
 end
 
 let dir = DATA_DIR
-let input_file = ref (Filename.concat dir "examples/logo.dep")
+
+let (input_file : string option ref) = ref None
 let (input_last_modifaction_time) = ref 0.
 
 let (output_file : string option ref) = ref None
