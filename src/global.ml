@@ -34,11 +34,11 @@ exception Error of Yojson.Basic.t
 let error ?file ?line ?fct ?data msg =
   let opt_list = [
     Some ("message", `String msg);
-    (CCOpt.map (fun x -> ("file", `String x)) file);
-    (CCOpt.map (fun x -> ("line", `Int x)) line);
+    (CCOption.map (fun x -> ("file", `String x)) file);
+    (CCOption.map (fun x -> ("line", `Int x)) line);
     Some ("program", `String "dep2pict");
-    (CCOpt.map (fun x -> ("function", `String x)) fct);
-    (CCOpt.map (fun x -> ("data", `String x)) data);
+    (CCOption.map (fun x -> ("function", `String x)) fct);
+    (CCOption.map (fun x -> ("data", `String x)) data);
   ] in
   let json = `Assoc (CCList.filter_map (fun x->x) opt_list) in
   raise (Error json)

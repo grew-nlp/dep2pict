@@ -8,16 +8,6 @@ open Global
 
 let version = VERSION
 
-let _ =
-  Log.set_active_levels [`INFO; `WARNING];
-  Log.set_info_label "DEP2PICT";
-  Log.set_critical_label "DEP2PICT";
-  Log.set_write_to_log_file false;
-  Log.set_info_foreground Log.f_green;
-  Log.set_critical_foreground Log.f_red;
-  Log.set_critical_background Log.b_default;
-  Log.set_show_time true
-
 let usage = String.concat "\n" [
   "================================================================================";
   "=-=-=-=-= dep2pict: a tool to draw dependency graphs =-=-=-=-=";
@@ -61,7 +51,7 @@ let rec parse_arg = function
 
   | "-d"::tail | "--debug"::tail -> debug := true; parse_arg tail
 
-  | "-b"::tail | "--batch"::tail -> Log.set_active_levels []; batch := true; parse_arg tail
+  | "-b"::tail | "--batch"::tail -> batch := true; parse_arg tail
 
   | "--no_root"::tail -> no_root := true; parse_arg tail
 
