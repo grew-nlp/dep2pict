@@ -46,7 +46,7 @@ let error ?file ?line ?fct ?data msg =
 
 let batch = ref false
 let rtl = ref false
-let show_root = ref false
+let no_root = ref false
 
 let critical msg = ksprintf
   (fun m -> match !batch  with

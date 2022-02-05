@@ -63,7 +63,7 @@ let rec parse_arg = function
 
   | "-b"::tail | "--batch"::tail -> Log.set_active_levels []; batch := true; parse_arg tail
 
-  | "--show_root"::tail -> show_root := true; parse_arg tail
+  | "--no_root"::tail -> no_root := true; parse_arg tail
 
   | "-rtl":: tail | "--right_to_left":: tail -> rtl := true; parse_arg tail
   | s::_ when s.[0] = '-' -> Log.fcritical "Unknwon option \"%s\"" s
@@ -135,7 +135,7 @@ let main () =
           let graph = match (!current_data, !current_position) with
           | (Dep g,_) -> g
           | (Conll [||],_) -> error ~file: in_file "Empty Conll file"
-          | (Conll arr, pos) -> snd arr.(pos) |> Conllx.to_json |> Graph.of_json |> Graph.to_dep ~filter ~config:(Conllx_config.build "ud") |> (fun d -> Dep2pict.from_dep d) in
+          | (Conll arr, pos) -> snd arr.(pos) |> Conllx.to_json |> Graph.of_json |> Graph.to_dep ~filter ~no_root:(!no_root) ~config:(Conllx_config.build "ud") |> (fun d -> Dep2pict.from_dep d) in
           begin
             match Format.get out_file with
             | Format.Svg -> Dep2pict.save_svg ~filename:out_file graph
