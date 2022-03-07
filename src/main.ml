@@ -1,5 +1,4 @@
 open Printf
-open Log
 open Dep2pict
 open Conllx
 open Libgrew
@@ -56,7 +55,7 @@ let rec parse_arg = function
   | "--no_root"::tail -> no_root := true; parse_arg tail
 
   | "-rtl":: tail | "--right_to_left":: tail -> rtl := true; parse_arg tail
-  | s::_ when s.[0] = '-' -> Log.fcritical "Unknwon option \"%s\"" s
+  | s::_ when s.[0] = '-' -> Log.fail "Unknwon option \"%s\"" s
 
   | anon :: tail ->
     begin
@@ -65,7 +64,7 @@ let rec parse_arg = function
       else
         match !output_file with
         | None -> output_file := Some anon
-        | Some _ -> Log.fcritical "At most two anonymous arguments are allowed, don't know what to do with \"%s\"" anon
+        | Some _ -> Log.fail "At most two anonymous arguments are allowed, don't know what to do with \"%s\"" anon
     end;
     parse_arg tail
 
@@ -140,7 +139,7 @@ let main () =
             )
             | f -> critical "<%s> is not a valid output format" (Format.to_string f)
           end;
-          Log.finfo "File %s generated." out_file
+          ANSITerminal.eprintf [ANSITerminal.green] "File %s generated.\n" out_file
       with
       | Error json -> raise (Error json)
       | Dep2pict.Error json -> raise (Error json)

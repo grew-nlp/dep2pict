@@ -13,7 +13,6 @@ remove: [
 depends: [
   "cppo"
   "ANSITerminal"
-  "libcaml-log"
   "containers" { >= "3.6"}
   "camomile"
   "libcaml-dep2pict"

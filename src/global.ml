@@ -1,7 +1,22 @@
 open Printf
-open Log
 open Dep2pict
 open Conllx
+
+module Log = struct
+  let warning_ message =
+    ANSITerminal.eprintf [ANSITerminal.blue] "WARNING: %s\n" message;
+    Printf.eprintf "%!" (* force synchronous printing *)
+    
+  let warning message = Printf.ksprintf warning_ message
+
+  let fail_ message =
+    ANSITerminal.eprintf [ANSITerminal.red] "FAIL: %s\n" message;
+    Printf.eprintf "%!" (* force synchronous printing *);
+    exit 1
+    
+  let fail message = Printf.ksprintf fail_ message
+end
+
 
 exception Found of int
 
@@ -51,7 +66,7 @@ let no_root = ref false
 let critical msg = ksprintf
   (fun m -> match !batch  with
     | true -> eprintf "%s\n" m; exit 1
-    | false -> Log.fcritical "%s" m
+    | false -> Log.fail "%s" m
   ) msg
 
   let get_suffix file_name =
@@ -70,10 +85,10 @@ module Format = struct
 
   let get file =
     match get_suffix file with
-    | None -> Log.fwarning "Cannot guess format (no suffix) for file \"%s\"" file; No_suff
+    | None -> Log.warning "Cannot guess format (no suffix) for file \"%s\"" file; No_suff
     | Some suff ->
       try List.assoc suff [ (".dep",Dep); (".conll",Conll); (".conllu",Conll); (".png",Png); (".svg",Svg); (".pdf",Pdf); (".json",Json)]
-      with Not_found -> Log.fwarning "Unkwnow file extension \"%s\" for file \"%s\"" suff file; Unk suff
+      with Not_found -> Log.warning "Unkwnow file extension \"%s\" for file \"%s\"" suff file; Unk suff
 
   let to_string = function
     | Dep -> "dep"
@@ -110,7 +125,7 @@ let (special_chars : string option ref) = ref None
 let get_id () =
   match !current_data with
   | Conll arr -> fst (arr.(!current_position))
-  | _ -> Log.critical "[get_id] can be use only with CONLL data"
+  | _ -> Log.fail "[get_id] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
 let array_assoc key array =
@@ -126,39 +141,39 @@ let search_sentid sentid =
     begin
       match array_assoc sentid arr with
       | Some p -> current_position := p
-      | None -> Log.fcritical "No conll struct with name \"%s\"" sentid
+      | None -> Log.fail "No conll struct with name \"%s\"" sentid
     end
-  | _ -> Log.critical "[search_sentid] can be use only with CONLL data"
+  | _ -> Log.fail "[search_sentid] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
 let set_position () =
   match (!current_data, !current_position, !requested_sentid) with
   | (Conll _, _, Some sentid) -> search_sentid sentid
   | (Conll arr, p, None) when p < 0 || p >= (Array.length arr) ->
-    Log.fwarning "position %d is out of bounds, set position to 0" p;
+    Log.warning "position %d is out of bounds, set position to 0" p;
     current_position := 0
   | (Conll _, p, None) -> current_position := p
-  | (_, _, Some _) -> Log.fcritical "Options --sentid can be used only with CONLL input"
+  | (_, _, Some _) -> Log.fail "Options --sentid can be used only with CONLL input"
   | (_, _, None) -> ()
 
 (* -------------------------------------------------------------------------------- *)
 let first () =
   match !current_data with
   | Conll arr -> current_position := 0
-  | _ -> Log.critical "[first] can be use only with CONLL data"
+  | _ -> Log.fail "[first] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
 let last () =
   match !current_data with
   | Conll arr -> current_position :=((Array.length arr) - 1)
-  | _ -> Log.critical "[last] can be use only with CONLL data"
+  | _ -> Log.fail "[last] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
 let next () =
   match (!current_data, !current_position) with
     | (Conll arr, p)  when p < (Array.length arr) - 1 ->
       current_position := p+1
-  | _ -> Log.critical "[next] can be use only with CONLL data"
+  | _ -> Log.fail "[next] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
 let has_next () =
@@ -171,7 +186,7 @@ let prev () =
   match (!current_data, !current_position) with
     | (Conll _, p)  when p > 0 ->
       current_position := p-1
-  | _ -> Log.critical "[prev] can be use only with CONLL data"
+  | _ -> Log.fail "[prev] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
 let has_prev () =
@@ -197,7 +212,7 @@ let load file =
   | Format.Dep -> let dep = File.read file in current_data := Dep (Dep2pict.from_dep dep)
   | Format.Conll -> current_data := Conll (Conllx_corpus.get_data (Conllx_corpus.load ~config:(Conllx_config.build "ud") file))
   | _ ->
-    Log.fwarning "No valid input format detected for file \"%s\", try to guess...\n%!" file;
+    Log.warning "No valid input format detected for file \"%s\", try to guess...\n%!" file;
     let text = File.read file in
     if String.length text > 0 && (text.[0] = '1' || text.[0] = '#')
     then current_data := Conll (Conllx_corpus.get_data (Conllx_corpus.load file))
