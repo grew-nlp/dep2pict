@@ -1,6 +1,6 @@
 open Printf
 open Dep2pict
-open Conllx
+open Conll
 
 module Log = struct
   let warning_ message =
@@ -110,7 +110,7 @@ let (output_file : string option ref) = ref None
 
 type input_data =
   | Dep of Dep2pict.t
-  | Conll of (string * Conllx.t) array
+  | Conll of (string * Conll.t) array
 
 let current_data = ref (Conll [||])
 let (current_position : int ref) = ref 0   (* position of the current_focus in the current_array *)
@@ -210,10 +210,10 @@ let view_label () =
 let load file =
   match Format.get file with
   | Format.Dep -> let dep = File.read file in current_data := Dep (Dep2pict.from_dep dep)
-  | Format.Conll -> current_data := Conll (Conllx_corpus.get_data (Conllx_corpus.load ~config:(Conllx_config.build "ud") file))
+  | Format.Conll -> current_data := Conll (Conll_corpus.get_data (Conll_corpus.load ~config:(Conll_config.build "ud") file))
   | _ ->
     Log.warning "No valid input format detected for file \"%s\", try to guess...\n%!" file;
     let text = File.read file in
     if String.length text > 0 && (text.[0] = '1' || text.[0] = '#')
-    then current_data := Conll (Conllx_corpus.get_data (Conllx_corpus.load file))
+    then current_data := Conll (Conll_corpus.get_data (Conll_corpus.load file))
     else current_data := Dep (Dep2pict.from_dep text)
