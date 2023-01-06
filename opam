@@ -16,7 +16,7 @@ depends: [
   "containers" { >= "3.6"}
   "camomile"
   "libcaml-dep2pict"
-  "libcaml-grew"
+  "libcaml-grew" { >= "1.10.2"}
 ]
 synopsis: "A command line program to draw linguistic dependencies (see dep2pict.loria.fr)"
 url {
