@@ -15,10 +15,10 @@ depends: [
   "ANSITerminal"
   "containers" { >= "3.6"}
   "camomile"
-  "libcaml-dep2pict"
+  "dep2pictlib"
   "grewlib" { >= "1.12.0"}
 ]
-synopsis: "A command line program to draw linguistic dependencies (see dep2pict.loria.fr)"
+synopsis: "A command line program to draw linguistic dependencies"
 url {
   src: "http://opam.grew.fr/tgz/dep2pict.##VERSION##.tgz"
 }

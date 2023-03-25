@@ -1,5 +1,5 @@
 open Printf
-open Dep2pict
+open Dep2pictlib
 open Conll
 open Grewlib
 
@@ -78,10 +78,10 @@ let json_apply json_in json_out =
          match List.assoc_opt "dep_file" item with
          | Some (`String dep_file) ->
           let out_file = (Filename.chop_extension dep_file) ^ ".svg" in
-          let dep = Dep2pict.from_dep (File.read dep_file) in
-          Dep2pict.save_svg ~filename:out_file dep;
+          let dep = Dep2pictlib.from_dep (File.read dep_file) in
+          Dep2pictlib.save_svg ~filename:out_file dep;
           let new_fields =
-            match Dep2pict.highlight_shift () with
+            match Dep2pictlib.highlight_shift () with
             | Some f -> [("svg_file", `String out_file); ("shift", `Float f)]
             | None -> [("svg_file", `String out_file)] in
           `Assoc (item @ new_fields)
@@ -104,12 +104,12 @@ let main () =
   let arg_list = List.tl (Array.to_list Sys.argv) in
   let () = parse_arg arg_list in
 
-  if !debug then Dep2pict.set_verbose ();
+  if !debug then Dep2pictlib.set_verbose ();
 
   begin
     match !special_chars with
     | None -> ()
-    | Some filename -> Dep2pict.load_special_chars filename
+    | Some filename -> Dep2pictlib.load_special_chars filename
   end;
 
     match (!input_file, !output_file) with
@@ -124,12 +124,12 @@ let main () =
           let graph = match (!current_data, !current_position) with
           | (Dep g,_) -> g
           | (Conll [||],_) -> error ~file: in_file "Empty Conll file"
-          | (Conll arr, pos) -> snd arr.(pos) |> Conll.to_json |> Graph.of_json |> Graph.to_dep ~filter ~no_root:(!no_root) ~config:(Conll_config.build "ud") |> (fun d -> Dep2pict.from_dep d) in
+          | (Conll arr, pos) -> snd arr.(pos) |> Conll.to_json |> Graph.of_json |> Graph.to_dep ~filter ~no_root:(!no_root) ~config:(Conll_config.build "ud") |> (fun d -> Dep2pictlib.from_dep d) in
           begin
             match Format.get out_file with
-            | Format.Svg -> Dep2pict.save_svg ~filename:out_file graph
-            | Format.Pdf -> Dep2pict.save_pdf ~filename:out_file graph
-            | Format.Png -> Dep2pict.save_png ~filename:out_file graph
+            | Format.Svg -> Dep2pictlib.save_svg ~filename:out_file graph
+            | Format.Pdf -> Dep2pictlib.save_pdf ~filename:out_file graph
+            | Format.Png -> Dep2pictlib.save_png ~filename:out_file graph
             | Format.Dep -> (
               match (!current_data, !current_position) with
               | (Conll arr, p) ->
@@ -142,7 +142,7 @@ let main () =
           ANSITerminal.eprintf [ANSITerminal.green] "File %s generated.\n" out_file
       with
       | Error json -> raise (Error json)
-      | Dep2pict.Error json -> raise (Error json)
+      | Dep2pictlib.Error json -> raise (Error json)
       | Conll_error json -> raise (Error json)
       | Sys_error data -> error ~file: in_file ~data "Sys_error"
       | exc -> error ~file: in_file ~data:(Printexc.to_string exc) "Unexpected exception, please report"
