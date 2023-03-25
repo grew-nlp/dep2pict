@@ -1,7 +1,7 @@
 open Printf
 open Dep2pict
 open Conll
-open Libgrew
+open Grewlib
 
 open Global
 
