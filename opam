@@ -14,7 +14,6 @@ depends: [
   "cppo"
   "ANSITerminal"
   "containers" { >= "3.6"}
-  "camomile"
   "dep2pictlib"
   "grewlib" { >= "1.12.0"}
 ]

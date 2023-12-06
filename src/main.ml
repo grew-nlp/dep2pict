@@ -26,7 +26,6 @@ let usage = String.concat "\n" [
   "  -p | --position  <int> number of the dep structure to display when input file contains sequence (incompatible with -s | --sentid)";
   "  -d | --debug     add on_mouse_over tips in svg output and set verbose mode for font utilities";
   "  -b | --batch     Unformated error message that can be used in a pipeline or a web app";
-  "  --special_chars  <file> give a set of chars (one char by line) that are considered as 1.5 width of 'X' (for korean chars for instance)";
   "================================================================================";
 ]
 
@@ -45,8 +44,6 @@ let rec parse_arg = function
 
   (* does nothing (used by dep2pict-gui to check for existence of dep2pict program) *)
   | "--check"::_ -> exit 0
-
-  | "--special_chars"::s::tail -> special_chars := Some s; parse_arg tail
 
   | "-d"::tail | "--debug"::tail -> debug := true; parse_arg tail
 
@@ -105,12 +102,6 @@ let main () =
   let () = parse_arg arg_list in
 
   if !debug then Dep2pictlib.set_verbose ();
-
-  begin
-    match !special_chars with
-    | None -> ()
-    | Some filename -> Dep2pictlib.load_special_chars filename
-  end;
 
     match (!input_file, !output_file) with
     | (None,_) | (_,None) -> Log.warning "Two main arguments needed"; printf "%s\n%!" usage; exit 0

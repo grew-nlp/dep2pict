@@ -119,9 +119,6 @@ let debug = ref false
 
 let requested_sentid = ref None
 
-(* the name of the file containing special chars (like korean chars) *)
-let (special_chars : string option ref) = ref None
-
 let get_id () =
   match !current_data with
   | Conll arr -> fst (arr.(!current_position))
