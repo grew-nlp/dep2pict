@@ -101,8 +101,6 @@ module Format = struct
     | Unk suff -> sprintf "unknown suffix '%s'" suff
 end
 
-let dir = DATA_DIR
-
 let (input_file : string option ref) = ref None
 let (input_last_modifaction_time) = ref 0.
 
