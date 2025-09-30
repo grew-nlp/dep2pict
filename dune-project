@@ -2,7 +2,7 @@
 
 (name dep2pict)
 
-(version 2.36.0)
+(version 2.37.0)
 
 (generate_opam_files true)
 
