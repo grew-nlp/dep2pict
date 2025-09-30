@@ -1,0 +1,15 @@
+(executable
+ (public_name dep2pict)
+ (name dep2pict_main)
+ (libraries 
+   str
+   ANSITerminal 
+   containers 
+   yojson 
+   amr 
+   conll
+   grewlib
+   dep2pictlib
+   dune-build-info
+ )
+)

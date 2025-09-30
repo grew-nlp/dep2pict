@@ -5,7 +5,11 @@ open Grewlib
 
 open Global
 
-let version = VERSION
+let version =
+  match Build_info.V1.version () with
+  | Some v -> Printf.sprintf "%s" (Build_info.V1.Version.to_string v)
+  | None -> Printf.sprintf "dev"
+
 
 let usage = String.concat "\n" [
   "================================================================================";

@@ -154,7 +154,7 @@ let set_position () =
 (* -------------------------------------------------------------------------------- *)
 let first () =
   match !current_data with
-  | Conll arr -> current_position := 0
+  | Conll _ -> current_position := 0
   | _ -> Log.fail "[first] can be use only with CONLL data"
 
 (* -------------------------------------------------------------------------------- *)
